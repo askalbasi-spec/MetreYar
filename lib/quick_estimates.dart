@@ -120,14 +120,14 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
     super.dispose();
   }
 
-  double _value(String key) {
+  double _value(String key, {bool allowZero = false}) {
     final raw = _controllers[key]!.text
         .replaceAll('۰', '0').replaceAll('۱', '1').replaceAll('۲', '2')
         .replaceAll('۳', '3').replaceAll('۴', '4').replaceAll('۵', '5')
         .replaceAll('۶', '6').replaceAll('۷', '7').replaceAll('۸', '8')
         .replaceAll('۹', '9').replaceAll('٫', '.').replaceAll(',', '.');
     final value = double.tryParse(raw);
-    if (value == null || !value.isFinite || value <= 0) {
+    if (value == null || !value.isFinite || (allowZero ? value < 0 : value <= 0)) {
       throw const FormatException('همه مقادیر باید عددی مثبت و معتبر باشند.');
     }
     return value;
@@ -164,7 +164,7 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           result += '\nبرای استوانه: ${(math.pi * math.pow(v('width') / 2, 2) * v('height')).toStringAsFixed(3)} مترمکعب (قطر = عرض)';
         case 20:
           final asphaltKg = v('area') * v('thickness') / 100 * v('density');
-          final tiles = (v('area') / v('tileArea') * (1 + v('waste') / 100)).ceil();
+          final tiles = (v('area') / v('tileArea') * (1 + _value('waste', allowZero: true) / 100)).ceil();
           result = 'آسفالت: ${asphaltKg.toStringAsFixed(1)} کیلوگرم\nکاشی/سرامیک با پرت: $tiles عدد';
         default:
           throw const FormatException('برای این مورد محاسبه عددی تعریف نشده است.');
