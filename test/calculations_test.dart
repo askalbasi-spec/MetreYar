@@ -24,9 +24,25 @@ void main() {
       );
     });
 
-    test('rejects zero or negative dimensions', () {
+    test('rejects zero dimensions', () {
       expect(
         () => MetreYarCalculations.rectangleArea(lengthM: 0, widthM: 3),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects negative dimensions', () {
+      expect(
+        () => MetreYarCalculations.concreteVolume(
+          lengthM: 2, widthM: -1, heightM: 1),
+        throwsArgumentError,
+      );
+    });
+
+    test('rejects non-finite values', () {
+      expect(
+        () => MetreYarCalculations.rectangleArea(
+          lengthM: double.infinity, widthM: 2),
         throwsArgumentError,
       );
     });
