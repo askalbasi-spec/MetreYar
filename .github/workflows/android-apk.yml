@@ -12,7 +12,7 @@ on:
       - '.github/workflows/android-apk.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -51,10 +51,15 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: metreyar-android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: error
-          retention-days: 1
+      - name: Publish APK as GitHub Release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view metreyar-latest >/dev/null 2>&1; then
+            gh release create metreyar-latest \
+              --title "MetreYar Android APK" \
+              --notes "Latest automatically built APK. This build is for testing and is not signed for store publication." \
+              --prerelease
+          fi
+          gh release upload metreyar-latest build/app/outputs/flutter-apk/app-release.apk \
+            --clobber
