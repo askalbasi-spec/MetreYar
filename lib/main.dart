@@ -5,9 +5,7 @@ const _navy = Color(0xFF101B2D);
 const _gold = Color(0xFFD6AD55);
 const _silver = Color(0xFFD9DEE7);
 
-void main() {
-  runApp(const MetreYarApp());
-}
+void main() => runApp(const MetreYarApp());
 
 class MetreYarApp extends StatelessWidget {
   const MetreYarApp({super.key});
@@ -31,7 +29,7 @@ class MetreYarApp extends StatelessWidget {
           foregroundColor: _silver,
           centerTitle: true,
         ),
-        cardColor: const Color(0xFF1B2940),
+        cardTheme: const CardThemeData(color: Color(0xFF1B2940)),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFF24344D),
@@ -172,6 +170,10 @@ abstract class _CalculatorPageState<T extends _CalculatorPage> extends State<T> 
   String? result;
   String? error;
 
+  void initializeControllers(int count) {
+    controllers.addAll(List.generate(count, (_) => TextEditingController()));
+  }
+
   @override
   void dispose() {
     for (final controller in controllers) {
@@ -180,13 +182,11 @@ abstract class _CalculatorPageState<T extends _CalculatorPage> extends State<T> 
     super.dispose();
   }
 
-  Widget numberField(String label, String unit) {
-    final controller = TextEditingController();
-    controllers.add(controller);
+  Widget numberField(int index, String label, String unit) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
-        controller: controller,
+        controller: controllers[index],
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(labelText: label, suffixText: unit),
       ),
@@ -213,7 +213,7 @@ abstract class _CalculatorPageState<T extends _CalculatorPage> extends State<T> 
         result = '${value.toStringAsFixed(3)} $unit';
         error = null;
       } on Object catch (e) {
-        error = e is FormatException ? e.message : 'مقادیر واردشده معتبر نیستند.';
+        error = e is FormatException ? e.message.toString() : 'مقادیر واردشده معتبر نیستند.';
         result = null;
       }
     });
@@ -273,13 +273,19 @@ class ConcreteCalculator extends _CalculatorPage {
 
 class _ConcreteCalculatorState extends _CalculatorPageState<ConcreteCalculator> {
   @override
+  void initState() {
+    super.initState();
+    initializeControllers(3);
+  }
+
+  @override
   Widget build(BuildContext context) => buildCalculator(
         title: 'محاسبه حجم بتن',
         hint: 'ابعاد عضو بتنی را بر حسب متر وارد کنید.',
         fields: [
-          numberField('طول', 'متر'),
-          numberField('عرض', 'متر'),
-          numberField('ارتفاع', 'متر'),
+          numberField(0, 'طول', 'متر'),
+          numberField(1, 'عرض', 'متر'),
+          numberField(2, 'ارتفاع', 'متر'),
         ],
         onCalculate: () => calculate(
           () => MetreYarCalculations.concreteVolume(
@@ -298,10 +304,16 @@ class RebarCalculator extends _CalculatorPage {
 
 class _RebarCalculatorState extends _CalculatorPageState<RebarCalculator> {
   @override
+  void initState() {
+    super.initState();
+    initializeControllers(2);
+  }
+
+  @override
   Widget build(BuildContext context) => buildCalculator(
         title: 'محاسبه وزن میلگرد',
         hint: 'قطر اسمی را بر حسب میلی‌متر و طول کل را بر حسب متر وارد کنید.',
-        fields: [numberField('قطر میلگرد', 'میلی‌متر'), numberField('طول کل', 'متر')],
+        fields: [numberField(0, 'قطر میلگرد', 'میلی‌متر'), numberField(1, 'طول کل', 'متر')],
         onCalculate: () => calculate(
           () => MetreYarCalculations.rebarWeightKg(
             diameterMm: readNumber(0), totalLengthM: readNumber(1)),
@@ -319,10 +331,16 @@ class AreaCalculator extends _CalculatorPage {
 
 class _AreaCalculatorState extends _CalculatorPageState<AreaCalculator> {
   @override
+  void initState() {
+    super.initState();
+    initializeControllers(2);
+  }
+
+  @override
   Widget build(BuildContext context) => buildCalculator(
         title: 'محاسبه مساحت',
         hint: 'طول و عرض سطح را بر حسب متر وارد کنید.',
-        fields: [numberField('طول', 'متر'), numberField('عرض', 'متر')],
+        fields: [numberField(0, 'طول', 'متر'), numberField(1, 'عرض', 'متر')],
         onCalculate: () => calculate(
           () => MetreYarCalculations.rectangleArea(
             lengthM: readNumber(0), widthM: readNumber(1)),
