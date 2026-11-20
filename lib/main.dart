@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'core/calculations.dart';
+import 'quick_estimates.dart';
 
 const _navy = Color(0xFF101B2D);
 const _gold = Color(0xFFD6AD55);
@@ -113,9 +114,15 @@ class HomePage extends StatelessWidget {
               subtitle: 'محاسبه مساحت سطوح مستطیلی',
               onTap: () => _openCalculator(context, const AreaCalculator()),
             ),
+            _ToolCard(
+              icon: Icons.construction_outlined,
+              title: '۲۰ محاسبه سرانگشتی ساختمان',
+              subtitle: 'سازه، مصالح، بتن، معماری و تأسیسات',
+              onTap: () => _openCalculator(context, const QuickEstimatesPage()),
+            ),
             const SizedBox(height: 18),
             const Center(
-              child: Text('نسخه 1.0.0  •  اینجین پلاس',
+              child: Text('نسخه 1.1.0  •  اینجین پلاس',
                   style: TextStyle(color: _silver, fontSize: 12)),
             ),
           ],
