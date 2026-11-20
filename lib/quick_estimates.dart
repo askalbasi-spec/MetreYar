@@ -148,6 +148,7 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           if (widget.spec.id == 2 || widget.spec.id == 4) result += ' کیلوگرم';
           if (widget.spec.id == 7) result += ' عدد آجر';
           if (widget.spec.id == 19) result += ' واحد ماده';
+          break;
         case 3:
           result = '${(v('volume') * v('rate')).toStringAsFixed(2)} کیلوگرم';
         case 8:
