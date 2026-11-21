@@ -3,22 +3,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/calculations.dart';
 import 'quick_estimates.dart';
 
-const _navy = Color(0xFF101B2D);
 const _gold = Color(0xFFD6AD55);
 const _silver = Color(0xFFD9DEE7);
 
-class _AppPalette {
-  const _AppPalette(this.name, this.subtitle, this.background, this.surface, this.primary, this.secondary, this.accent, this.onSurface);
+class AppPalette {
+  const AppPalette(this.name, this.subtitle, this.background, this.surface, this.primary, this.secondary, this.accent, this.onSurface);
   final String name, subtitle;
   final Color background, surface, primary, secondary, accent, onSurface;
 }
 
-const _palettes = <String, _AppPalette>{
-  'midnight': _AppPalette('سرمه‌ای و طلایی', 'تم اصلی اینجین پلاس', Color(0xFF101B2D), Color(0xFF1B2940), Color(0xFFD6AD55), Color(0xFFB9C5D6), Color(0xFF52627A), Color(0xFFF2F4F8)),
-  'concrete': _AppPalette('خاکستری صنعتی / بتنی', 'Industrial Concrete', Color(0xFF2F3640), Color(0xFF46505C), Color(0xFFE67E22), Color(0xFFDCDDE1), Color(0xFF7F8C8D), Color(0xFFFFFFFF)),
-  'blueprint': _AppPalette('آبی مهندسی / نقشه فنی', 'Engineering Blueprint', Color(0xFF1B3A5C), Color(0xFF244D73), Color(0xFFF1C40F), Color(0xFFD6EAF8), Color(0xFF3498DB), Color(0xFFFFFFFF)),
-  'green': _AppPalette('سبز ایمنی / پایداری', 'Safety Green', Color(0xFF1E5631), Color(0xFF2B7042), Color(0xFFC0392B), Color(0xFFD5F5E3), Color(0xFF4C9A2A), Color(0xFFFFFFFF)),
-  'fire': _AppPalette('قرمز-خاکستری هشدار', 'Fire Hazard', Color(0xFF922B21), Color(0xFF34495E), Color(0xFFF39C12), Color(0xFFEAECEE), Color(0xFFE74C3C), Color(0xFFFFFFFF)),
+const _palettes = <String, AppPalette>{
+  'midnight': AppPalette('سرمه‌ای و طلایی', 'تم اصلی اینجین پلاس', Color(0xFF101B2D), Color(0xFF1B2940), Color(0xFFD6AD55), Color(0xFFB9C5D6), Color(0xFF52627A), Color(0xFFF2F4F8)),
+  'concrete': AppPalette('خاکستری صنعتی / بتنی', 'Industrial Concrete', Color(0xFF2F3640), Color(0xFF46505C), Color(0xFFE67E22), Color(0xFFDCDDE1), Color(0xFF7F8C8D), Color(0xFFFFFFFF)),
+  'blueprint': AppPalette('آبی مهندسی / نقشه فنی', 'Engineering Blueprint', Color(0xFF1B3A5C), Color(0xFF244D73), Color(0xFFF1C40F), Color(0xFFD6EAF8), Color(0xFF3498DB), Color(0xFFFFFFFF)),
+  'green': AppPalette('سبز ایمنی / پایداری', 'Safety Green', Color(0xFF1E5631), Color(0xFF2B7042), Color(0xFFC0392B), Color(0xFFD5F5E3), Color(0xFF4C9A2A), Color(0xFFFFFFFF)),
+  'fire': AppPalette('قرمز-خاکستری هشدار', 'Fire Hazard', Color(0xFF922B21), Color(0xFF34495E), Color(0xFFF39C12), Color(0xFFEAECEE), Color(0xFFE74C3C), Color(0xFFFFFFFF)),
 };
 
 void main() => runApp(const MetreYarApp());
@@ -101,7 +100,7 @@ class _MetreYarAppState extends State<MetreYarApp> {
 class HomePage extends StatelessWidget {
   const HomePage({super.key, required this.profile, required this.palette, required this.onOpenSettings});
   final Map<String, String> profile;
-  final _AppPalette palette;
+  final AppPalette palette;
   final VoidCallback onOpenSettings;
 
   @override
