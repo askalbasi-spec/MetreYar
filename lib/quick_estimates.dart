@@ -85,8 +85,8 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id:46,title:'آجر نمای پلاک و ملات بندکشی',description:'تخمین کارتن آجر ال و کیسه ملات بندکشی.',formula:'کارتن=مساحت÷پوشش کارتن؛ کیسه=مساحت÷پوشش کیسه',inputs:[_InputSpec('area','مساحت نما','مترمربع'),_InputSpec('carton','پوشش هر کارتن ال','مترمربع',initial:'5'),_InputSpec('mortar','پوشش هر کیسه ۵۰ کیلویی','مترمربع',initial:'40')],resultUnit:'کارتن و کیسه'),
   _EstimateSpec(id:47,title:'پرت کاشی، سرامیک و سنگ',description:'محاسبه مساحت سفارش با درصد پرت انتخابی.',formula:'مساحت خالص×(۱+پرت)',inputs:[_InputSpec('area','مساحت خالص','مترمربع'),_InputSpec('waste','پرت','درصد',initial:'7')],resultUnit:'مترمربع سفارش'),
   _EstimateSpec(id:48,title:'ظرفیت گرمایشی و پره رادیاتور',description:'تخمین بار گرمایشی و تعداد پره.',formula:'توان=مساحت×وات بر مترمربع؛ پره=توان÷توان هر پره',inputs:[_InputSpec('area','مساحت مفید','مترمربع'),_InputSpec('rate','بار گرمایشی','وات بر مترمربع',initial:'155'),_InputSpec('fin','توان هر پره','وات',initial:'150')],resultUnit:'وات و تعداد پره'),
-  _EstimateSpec(id:49,title:'سیم‌کشی و تجهیزات برق',description:'تخمین طول سیم و تعداد کلید و پریز.',formula:'زیربنا×سرانه سیم',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه سیم','متر بر مترمربع',initial:'5'),_InputSpec('points','تعداد کلید و پریز','عدد',initial:'30')],resultUnit:'متر سیم و عدد تجهیزات'),
-  _EstimateSpec(id:50,title:'بلوک‌چینی با مساحت خالص',description:'محاسبه بلوک با کسر بازشو و افزودن پرت.',formula:'(مساحت−بازشو)÷مساحت بلوک×(۱+پرت)',inputs:[_InputSpec('area','مساحت دیوار','مترمربع'),_InputSpec('openings','مساحت بازشو','مترمربع',initial:'0'),_InputSpec('block','مساحت نمای بلوک','مترمربع',initial:'0.08'),_InputSpec('waste','پرت','درصد',initial:'6')],resultUnit:'عدد بلوک'),
+  _EstimateSpec(id:49,title:'لوله‌کشی آب و فاضلاب',description:'تخمین طول لوله آب سرد و گرم و لوله فاضلاب، باران و هواکش.',formula:'زیربنا × سرانه هر گروه لوله',inputs:[_InputSpec('area','زیربنای کل','مترمربع'),_InputSpec('waterRate','سرانه آب سرد و گرم','متر بر مترمربع',initial:'0.55'),_InputSpec('drainRate','سرانه فاضلاب و هواکش','متر بر مترمربع',initial:'0.65')],resultUnit:'متر لوله',warning:'این سرانه‌ها فقط برای تخمین اولیه‌اند؛ تعداد سرویس‌ها، رایزرها و نقشه تأسیسات ملاک متره است.'),
+  _EstimateSpec(id:50,title:'سیم‌کشی و تجهیزات برق',description:'تخمین طول سیم و تعداد کلید و پریز و تابلو.',formula:'زیربنا × سرانه سیم',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه سیم','متر بر مترمربع',initial:'5'),_InputSpec('points','تعداد کلید و پریز','عدد',initial:'30')],resultUnit:'متر سیم و عدد تجهیزات',warning:'طول واقعی به تعداد مدارها، رشته‌ها، مسیرها و نقشه برق وابسته است.'),
 ]; 
 
 class QuickEstimatesPage extends StatelessWidget {
@@ -243,7 +243,6 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           result = '${(v('volume') * v('rate')).ceil()} عدد آجر';
           break;
         case 37:
-        case 50:
           final net = v('area') - _value('openings', allowZero: true);
           if (net <= 0) throw const FormatException('مساحت خالص دیوار باید مثبت باشد.');
           result = '${(net / v('block') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد بلوک';
