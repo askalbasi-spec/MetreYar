@@ -144,8 +144,13 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
         case 4:
         case 7:
         case 19:
-          result = (v('area') * v('rate')).toStringAsFixed(2);
-          if (widget.spec.id == 2 || widget.spec.id == 4) result += ' کیلوگرم';
+          result = widget.spec.id == 7
+              ? (v('area') * v('rate')).ceil().toString()
+              : (v('area') * v('rate')).toStringAsFixed(2);
+          if (widget.spec.id == 2 || widget.spec.id == 4) {
+            final kg = v('area') * v('rate');
+            result = '${kg.toStringAsFixed(1)} کیلوگرم (حدود ${(kg / 1000).toStringAsFixed(3)} تن)';
+          }
           if (widget.spec.id == 7) result += ' عدد آجر';
           if (widget.spec.id == 19) result += ' واحد ماده';
           break;
