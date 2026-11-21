@@ -200,12 +200,12 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           result += '\nبرای استوانه: ${(math.pi * math.pow(v('width') / 2, 2) * v('height')).toStringAsFixed(3)} مترمکعب (قطر = عرض)';
 
         case 21:
-          result = 'فرغون: ${(v('volume') * 1000 / v('wheel')).ceil()} بار\\nمیکسر: ${(v('volume') * 1000 / v('mixer')).toStringAsFixed(2)} بار';
+          result = 'فرغون: ${(v('volume') * 1000 / v('wheel')).ceil()} بار\nمیکسر: ${(v('volume') * 1000 / v('mixer')).toStringAsFixed(2)} بار';
           break;
         case 22:
           final bank = v('length') * v('width') * v('depth');
           final loose = bank * v('factor');
-          result = 'حجم درجا: ${bank.toStringAsFixed(2)} مترمکعب\\nحجم با تورم: ${loose.toStringAsFixed(2)} مترمکعب\\nکامیون: ${(loose / v('truck')).ceil()} سرویس';
+          result = 'حجم درجا: ${bank.toStringAsFixed(2)} مترمکعب\nحجم با تورم: ${loose.toStringAsFixed(2)} مترمکعب\nکامیون: ${(loose / v('truck')).ceil()} سرویس';
           break;
         case 23:
         case 25:
@@ -220,24 +220,24 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           final amount = v('area') * v('rate');
           result = '${amount.toStringAsFixed(2)} ${widget.spec.resultUnit}';
           if (widget.spec.id == 25 || widget.spec.id == 40) result += ' (حدود ${(amount / 1000).toStringAsFixed(3)} تن)';
-          if (widget.spec.id == 26) result += '\\nمعادل ${(amount / 1000).toStringAsFixed(3)} مترمکعب';
+          if (widget.spec.id == 26) result += '\nمعادل ${(amount / 1000).toStringAsFixed(3)} مترمکعب';
           break;
         case 24:
-          result = 'مصالح سنگی کل: ${(v('volume') * v('total')).toStringAsFixed(1)} کیلوگرم\\nشن: ${(v('volume') * v('gravel')).toStringAsFixed(2)} مترمکعب\\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(2)} مترمکعب';
+          result = 'مصالح سنگی کل: ${(v('volume') * v('total')).toStringAsFixed(1)} کیلوگرم\nشن: ${(v('volume') * v('gravel')).toStringAsFixed(2)} مترمکعب\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(2)} مترمکعب';
           break;
         case 32:
           final eff = v('slab') - v('deck') / 2;
           if (eff <= 0) throw const FormatException('ضخامت مؤثر بتن باید مثبت باشد.');
-          result = 'ورق با پرت: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\\nبتن: ${(v('area') * eff).toStringAsFixed(3)} مترمکعب';
+          result = 'ورق با پرت: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\nبتن: ${(v('area') * eff).toStringAsFixed(3)} مترمکعب';
           break;
         case 33:
-          result = 'قالب: ${(v('area') / v('module') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد\\nبتن: ${(v('area') * v('thickness')).toStringAsFixed(3)} مترمکعب';
+          result = 'قالب: ${(v('area') / v('module') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد\nبتن: ${(v('area') * v('thickness')).toStringAsFixed(3)} مترمکعب';
           break;
         case 34:
           result = '${(v('wall') * v('factor')).toStringAsFixed(3)} مترمکعب ملات';
           break;
         case 35:
-          result = 'سیمان: ${(v('volume') * v('cement')).toStringAsFixed(1)} کیلوگرم\\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(1)} کیلوگرم';
+          result = 'سیمان: ${(v('volume') * v('cement')).toStringAsFixed(1)} کیلوگرم\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(1)} کیلوگرم';
           break;
         case 36:
           result = '${(v('volume') * v('rate')).ceil()} عدد آجر';
@@ -252,7 +252,7 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           result = '${(v('area') / v('coverage') * (1 + v('waste', allowZero: true) / 100)).ceil()} کیسه ۴۰ کیلویی';
           break;
         case 43:
-          result = 'ورق: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\\nپیچ: ${(v('area') * v('screws')).ceil()} عدد\\nشاخص طول سازه فرعی: ${(v('area') * 100 / v('spacing')).toStringAsFixed(1)} متر';
+          result = 'ورق: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\nپیچ: ${(v('area') * v('screws')).ceil()} عدد\nشاخص طول سازه فرعی: ${(v('area') * 100 / v('spacing')).toStringAsFixed(1)} متر';
           break;
         case 44:
         case 45:
@@ -260,17 +260,17 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           result = '${(v('area') * v('coats') / v('coverage') * (1 + extra / 100)).toStringAsFixed(2)} کیلوگرم رنگ';
           break;
         case 46:
-          result = 'کارتن آجر ال: ${(v('area') / v('carton')).ceil()}\\nکیسه بندکشی: ${(v('area') / v('mortar')).ceil()}';
+          result = 'کارتن آجر ال: ${(v('area') / v('carton')).ceil()}\nکیسه بندکشی: ${(v('area') / v('mortar')).ceil()}';
           break;
         case 47:
           result = '${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع سفارش';
           break;
         case 48:
           final watts = v('area') * v('rate');
-          result = 'بار گرمایشی: ${watts.toStringAsFixed(0)} وات\\nپره رادیاتور: ${(watts / v('fin')).ceil()} عدد';
+          result = 'بار گرمایشی: ${watts.toStringAsFixed(0)} وات\nپره رادیاتور: ${(watts / v('fin')).ceil()} عدد';
           break;
         case 49:
-          result = 'طول سیم: ${(v('area') * v('rate')).toStringAsFixed(1)} متر\\nکلید و پریز: ${v('points').ceil()} عدد';
+          result = 'طول سیم: ${(v('area') * v('rate')).toStringAsFixed(1)} متر\nکلید و پریز: ${v('points').ceil()} عدد';
           break;
         case 20:
           final asphaltKg = v('area') * v('thickness') / 100 * v('density');
