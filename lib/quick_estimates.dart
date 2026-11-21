@@ -130,6 +130,262 @@ class _EstimateDetailPage extends StatefulWidget {
   State<_EstimateDetailPage> createState() => _EstimateDetailPageState();
 }
 
+/// Converts Persian/Arabic digits and common locale-specific separators to a number.
+double parseEstimateNumber(
+  String raw, {
+  required String label,
+  bool allowZero = false,
+}) {
+  final normalizedDigits = String.fromCharCodes(raw.runes.map((rune) {
+    if (rune >= 0x06F0 && rune <= 0x06F9) return rune - 0x06F0 + 0x30;
+    if (rune >= 0x0660 && rune <= 0x0669) return rune - 0x0660 + 0x30;
+    if (rune >= 0xFF10 && rune <= 0xFF19) return rune - 0xFF10 + 0x30;
+    return rune;
+  }));
+  var normalized = normalizedDigits
+      .replaceAll('٫', '.')
+      .replaceAll('٬', '')
+      .replaceAll(RegExp(r'[\\s\\u00A0\\u200E\\u200F\\u202A-\\u202E\\u2066-\\u2069]'), '');
+  if (normalized.contains(',') && normalized.contains('.')) {
+    normalized = normalized.replaceAll(',', '');
+  } else if (RegExp(r'^[+-]?\\d{1,3}(,\\d{3})+
+  final Map<String, TextEditingController> _controllers = {};
+  String? _result;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final field in widget.spec.inputs) {
+      _controllers[field.key] = TextEditingController(text: field.initial);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  double _value(String key, {bool allowZero = false}) {
+    final controller = _controllers[key];
+    final field = widget.spec.inputs.where((item) => item.key == key);
+    final label = field.isEmpty ? key : field.first.label;
+    if (controller == null) {
+      throw FormatException('فیلد «$label» در این محاسبه تعریف نشده است.');
+    }
+    return parseEstimateNumber(controller.text, label: label, allowZero: allowZero);
+  }
+
+  void _calculate() {
+    try {
+      final v = _value;
+      String result;
+      switch (widget.spec.id) {
+        case 1:
+          result = '${(v('diameter') * v('diameter') / 162 * v('length')).toStringAsFixed(2)} کیلوگرم';
+        case 2:
+        case 4:
+        case 7:
+        case 19:
+          result = widget.spec.id == 7
+              ? (v('area') * v('rate')).ceil().toString()
+              : (v('area') * v('rate')).toStringAsFixed(2);
+          if (widget.spec.id == 2 || widget.spec.id == 4) {
+            final kg = v('area') * v('rate');
+            result = '${kg.toStringAsFixed(1)} کیلوگرم (حدود ${(kg / 1000).toStringAsFixed(3)} تن)';
+          }
+          if (widget.spec.id == 7) result += ' عدد آجر';
+          if (widget.spec.id == 19) result += ' واحد ماده';
+          break;
+        case 3:
+          result = '${(v('volume') * v('rate')).toStringAsFixed(2)} کیلوگرم';
+        case 8:
+          final mortar = v('wall') * v('factor');
+          final cement = mortar * v('cement');
+          final sand = mortar * v('sand');
+          result = 'ملات: ${mortar.toStringAsFixed(3)} مترمکعب\nسیمان: ${cement.toStringAsFixed(1)} کیلوگرم\nماسه: ${sand.toStringAsFixed(1)} کیلوگرم';
+        case 9:
+        case 10:
+          result = '${(v('area') * v('thickness') / 100).toStringAsFixed(3)} مترمکعب';
+        case 13:
+          result = '${(v('length') * v('width') * v('height')).toStringAsFixed(3)} مترمکعب';
+          result += '\nبرای استوانه: ${(math.pi * math.pow(v('width') / 2, 2) * v('height')).toStringAsFixed(3)} مترمکعب (قطر = عرض)';
+
+        case 21:
+          result = 'فرغون: ${(v('volume') * 1000 / v('wheel')).ceil()} بار\nمیکسر: ${(v('volume') * 1000 / v('mixer')).toStringAsFixed(2)} بار';
+          break;
+        case 22:
+          final bank = v('length') * v('width') * v('depth');
+          final loose = bank * v('factor');
+          result = 'حجم درجا: ${bank.toStringAsFixed(2)} مترمکعب\nحجم با تورم: ${loose.toStringAsFixed(2)} مترمکعب\nکامیون: ${(loose / v('truck')).ceil()} سرویس';
+          break;
+        case 23:
+        case 25:
+        case 26:
+        case 28:
+        case 29:
+        case 30:
+        case 31:
+        case 38:
+        case 39:
+        case 40:
+          final amount = v('area') * v('rate');
+          result = '${amount.toStringAsFixed(2)} ${widget.spec.resultUnit}';
+          if (widget.spec.id == 25 || widget.spec.id == 40) result += ' (حدود ${(amount / 1000).toStringAsFixed(3)} تن)';
+          if (widget.spec.id == 26) result += '\nمعادل ${(amount / 1000).toStringAsFixed(3)} مترمکعب';
+          break;
+        case 24:
+          result = 'مصالح سنگی کل: ${(v('volume') * v('total')).toStringAsFixed(1)} کیلوگرم\nشن: ${(v('volume') * v('gravel')).toStringAsFixed(2)} مترمکعب\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(2)} مترمکعب';
+          break;
+        case 32:
+          final eff = v('slab') - v('deck') / 2;
+          if (eff <= 0) throw const FormatException('ضخامت مؤثر بتن باید مثبت باشد.');
+          result = 'ورق با پرت: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\nبتن: ${(v('area') * eff).toStringAsFixed(3)} مترمکعب';
+          break;
+        case 33:
+          result = 'قالب: ${(v('area') / v('module') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد\nبتن: ${(v('area') * v('thickness')).toStringAsFixed(3)} مترمکعب';
+          break;
+        case 34:
+          result = '${(v('wall') * v('factor')).toStringAsFixed(3)} مترمکعب ملات';
+          break;
+        case 35:
+          result = 'سیمان: ${(v('volume') * v('cement')).toStringAsFixed(1)} کیلوگرم\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(1)} کیلوگرم';
+          break;
+        case 36:
+          result = '${(v('volume') * v('rate')).ceil()} عدد آجر';
+          break;
+        case 37:
+          final net = v('area') - _value('openings', allowZero: true);
+          if (net <= 0) throw const FormatException('مساحت خالص دیوار باید مثبت باشد.');
+          result = '${(net / v('block') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد بلوک';
+          break;
+        case 41:
+        case 42:
+          result = '${(v('area') / v('coverage') * (1 + v('waste', allowZero: true) / 100)).ceil()} کیسه ۴۰ کیلویی';
+          break;
+        case 43:
+          result = 'ورق: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\nپیچ: ${(v('area') * v('screws')).ceil()} عدد\nشاخص طول سازه فرعی: ${(v('area') * 100 / v('spacing')).toStringAsFixed(1)} متر';
+          break;
+        case 44:
+        case 45:
+          final extra = widget.spec.id == 44 ? v('waste', allowZero: true) : v('extra', allowZero: true);
+          result = '${(v('area') * v('coats') / v('coverage') * (1 + extra / 100)).toStringAsFixed(2)} کیلوگرم رنگ';
+          break;
+        case 46:
+          result = 'کارتن آجر ال: ${(v('area') / v('carton')).ceil()}\nکیسه بندکشی: ${(v('area') / v('mortar')).ceil()}';
+          break;
+        case 47:
+          result = '${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع سفارش';
+          break;
+        case 48:
+          final watts = v('area') * v('rate');
+          result = 'بار گرمایشی: ${watts.toStringAsFixed(0)} وات\nپره رادیاتور: ${(watts / v('fin')).ceil()} عدد';
+          break;
+        case 49:
+          result = 'آب سرد و گرم: ${(v('area') * v('waterRate')).toStringAsFixed(1)} متر\nفاضلاب، باران و هواکش: ${(v('area') * v('drainRate')).toStringAsFixed(1)} متر';
+          break;
+        case 50:
+          result = 'طول سیم: ${(v('area') * v('rate')).toStringAsFixed(1)} متر\nکلید و پریز: ${v('points').ceil()} عدد';
+          break;
+        case 20:
+          final asphaltKg = v('area') * v('thickness') / 100 * v('density');
+          final tiles = (v('area') / v('tileArea') * (1 + _value('waste', allowZero: true) / 100)).ceil();
+          result = 'آسفالت: ${asphaltKg.toStringAsFixed(1)} کیلوگرم\nکاشی/سرامیک با پرت: $tiles عدد';
+        default:
+          throw const FormatException('برای این مورد محاسبه عددی تعریف نشده است.');
+      }
+      setState(() { _result = result; _error = null; });
+    } on Object catch (e) {
+      setState(() { _result = null; _error = e is FormatException ? e.message.toString() : 'ورودی‌ها معتبر نیستند.'; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = widget.spec;
+    return Scaffold(
+      appBar: AppBar(title: Text(spec.title)),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Text(spec.description, style: const TextStyle(color: _silver, height: 1.7)),
+          if (spec.formula != null) ...[
+            const SizedBox(height: 12),
+            Text('فرمول: ${spec.formula}', style: const TextStyle(color: _gold, height: 1.8)),
+          ],
+          if (spec.inputs.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            for (final field in spec.inputs)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextField(
+                  controller: _controllers[field.key],
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(labelText: field.label, suffixText: field.unit),
+                ),
+              ),
+            FilledButton.icon(
+              onPressed: _calculate,
+              icon: const Icon(Icons.calculate_outlined),
+              label: const Text('محاسبه'),
+            ),
+            if (_result != null) ...[
+              const SizedBox(height: 18),
+              Card(child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: SelectableText(_result!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, height: 1.8)),
+              )),
+            ],
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+            ],
+          ] else ...[
+            const SizedBox(height: 18),
+            const Card(child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('راهنمای کنترل اولیه', style: TextStyle(color: _gold, fontWeight: FontWeight.bold)),
+            )),
+            const SizedBox(height: 8),
+            Text(spec.guide ?? '', style: const TextStyle(height: 1.9)),
+          ],
+          if (spec.warning != null) ...[
+            const SizedBox(height: 18),
+            Card(
+              color: const Color(0xFF332B20),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Icon(Icons.info_outline, color: _gold),
+                  const SizedBox(width: 10),
+                  Expanded(child: Text(spec.warning!, style: const TextStyle(height: 1.7))),
+                ]),
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
+          const Text('این ابزار برای برآورد اولیه و کنترل کارگاهی است و جایگزین نقشه‌ها، مشخصات فنی، گزارش ژئوتکنیک یا محاسبات مهندسی و ضوابط لازم‌الاجرا نیست.', style: TextStyle(color: _silver, fontSize: 12, height: 1.8)),
+        ],
+      ),
+    );
+  }
+}
+).hasMatch(normalized)) {
+    normalized = normalized.replaceAll(',', '');
+  } else {
+    normalized = normalized.replaceAll(',', '.');
+  }
+  final value = double.tryParse(normalized);
+  if (value == null || !value.isFinite || (allowZero ? value < 0 : value <= 0)) {
+    final requirement = allowZero ? 'صفر یا عدد مثبت' : 'عدد مثبت';
+    throw FormatException('مقدار «$label» باید $requirement معتبر باشد.');
+  }
+  return value;
+}
+
 class _EstimateDetailPageState extends State<_EstimateDetailPage> {
   final Map<String, TextEditingController> _controllers = {};
   String? _result;
@@ -152,16 +408,13 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
   }
 
   double _value(String key, {bool allowZero = false}) {
-    final raw = _controllers[key]!.text
-        .replaceAll('۰', '0').replaceAll('۱', '1').replaceAll('۲', '2')
-        .replaceAll('۳', '3').replaceAll('۴', '4').replaceAll('۵', '5')
-        .replaceAll('۶', '6').replaceAll('۷', '7').replaceAll('۸', '8')
-        .replaceAll('۹', '9').replaceAll('٫', '.').replaceAll(',', '.');
-    final value = double.tryParse(raw);
-    if (value == null || !value.isFinite || (allowZero ? value < 0 : value <= 0)) {
-      throw const FormatException('همه مقادیر باید عددی مثبت و معتبر باشند.');
+    final controller = _controllers[key];
+    final field = widget.spec.inputs.where((item) => item.key == key);
+    final label = field.isEmpty ? key : field.first.label;
+    if (controller == null) {
+      throw FormatException('فیلد «$label» در این محاسبه تعریف نشده است.');
     }
-    return value;
+    return parseEstimateNumber(controller.text, label: label, allowZero: allowZero);
   }
 
   void _calculate() {
