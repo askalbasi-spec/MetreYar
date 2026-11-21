@@ -106,17 +106,27 @@ Widget quickEstimatePage(int id) {
 }
 
 class QuickEstimatesPage extends StatelessWidget {
-  const QuickEstimatesPage({super.key});
+  const QuickEstimatesPage({super.key, this.initialTabIndex = 0});
+
+  final int initialTabIndex;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
+      initialIndex: initialTabIndex.clamp(0, 2),
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('۵۳ ابزار متره و برآورد'),
+          title: const Text('ابزارهای متره و برآورد'),
+          backgroundColor: const Color(0xFF101B2D),
           bottom: const TabBar(
             isScrollable: true,
+            indicatorColor: _gold,
+            indicatorWeight: 3,
+            labelColor: _gold,
+            unselectedLabelColor: _silver,
+            labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             tabs: [
               Tab(text: 'بتن و سفت‌کاری'),
               Tab(text: 'نازک‌کاری'),
@@ -143,29 +153,34 @@ class _EstimateTabGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(14, 16, 14, 28),
       children: [
         for (final category in categories) ...[
           Card(
             child: Padding(
               padding: const EdgeInsets.all(13),
-              child: Text(category, style: const TextStyle(color: _gold, fontWeight: FontWeight.bold)),
+              child: Row(children: [
+                Container(width: 4, height: 22, decoration: BoxDecoration(color: _gold, borderRadius: BorderRadius.circular(4))),
+                const SizedBox(width: 10),
+                Text(category, style: const TextStyle(color: _gold, fontWeight: FontWeight.w800, fontSize: 15)),
+              ]),
             ),
           ),
           for (final item in _estimates.where((e) => _categoryForEstimate(e.id) == category))
             Card(
-              margin: const EdgeInsets.only(bottom: 7),
+              margin: const EdgeInsets.only(bottom: 9),
               child: ListTile(
                 leading: CircleAvatar(
+                  radius: 21,
                   backgroundColor: _gold.withValues(alpha: .15),
                   child: Text('${item.id}', style: const TextStyle(color: _gold, fontWeight: FontWeight.bold)),
                 ),
-                title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
                 subtitle: Text(
                   item.inputs.isEmpty ? 'راهنمای مهندسی — بدون محاسبه عددی' : item.description,
                   style: const TextStyle(color: _silver),
                 ),
-                trailing: const Icon(Icons.chevron_left, color: _gold),
+                trailing: const Icon(Icons.arrow_back_ios_new_rounded, color: _gold, size: 15),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
                   builder: (_) => _EstimateDetailPage(spec: item),
                 )),
