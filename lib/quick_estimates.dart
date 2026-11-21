@@ -297,11 +297,12 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
         case 31:
         case 38:
         case 39:
-        case 40:
           final amount = v('area') * v('rate');
           result = '${amount.toStringAsFixed(2)} ${widget.spec.resultUnit}';
-          if (widget.spec.id == 25 || widget.spec.id == 40) result += ' (حدود ${(amount / 1000).toStringAsFixed(3)} تن)';
-          if (widget.spec.id == 26) result += '\nمعادل ${(amount / 1000).toStringAsFixed(3)} مترمکعب';
+          break;
+        case 40:
+          final dryMaterialKg = v('volume') * v('rate');
+          result = '${dryMaterialKg.toStringAsFixed(1)} کیلوگرم مصالح خشک (حدود ${(dryMaterialKg / 1000).toStringAsFixed(3)} تن)';
           break;
         case 24:
           result = 'مصالح سنگی کل: ${(v('volume') * v('total')).toStringAsFixed(1)} کیلوگرم\nشن: ${(v('volume') * v('gravel')).toStringAsFixed(2)} مترمکعب\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(2)} مترمکعب';
