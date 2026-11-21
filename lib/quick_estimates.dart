@@ -56,7 +56,38 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id: 18, title: 'عایق‌کاری حرارتی (مبحث ۱۹)', description: 'راهنمای تخمین اولیه عایق پوسته ساختمان.', guide: 'ضخامت عایق موردنیاز با اقلیم، نوع و لایه‌های دیوار، ضریب هدایت حرارتی، پل‌های حرارتی و ویرایش معتبر مبحث ۱۹ تغییر می‌کند. اعداد ۷٫۵ و ۳ سانتی‌متر یا معادل‌سازی مصالح در متن اولیه، بدون تعیین نوع عایق و مشخصات دیوار، نسخه عمومی و قطعی نیستند. محاسبه نهایی باید بر اساس مقاومت حرارتی کل جداره انجام شود.'),
   _EstimateSpec(id: 19, title: 'مقدار رنگ و گچ‌کاری', description: 'برآورد رنگ و ملات گچ بر اساس سطح و نرخ مصرف.', formula: 'مقدار = مساحت × نرخ مصرف', inputs: [_InputSpec('area', 'مساحت سطح', 'مترمربع'), _InputSpec('rate', 'نرخ مصرف برای هر مترمربع', 'کیلوگرم یا لیتر', initial: '1')], resultUnit: 'واحد ماده', warning: 'نرخ مصرف را از مشخصات محصول، تعداد دست اجرا، زیرکار و پرت واقعی بگیرید. برای رنگ و گچ، نرخ مصرف جداگانه تعریف کنید.'),
   _EstimateSpec(id: 20, title: 'آسفالت و کاشی / سرامیک', description: 'محاسبه حجم آسفالت و تعداد قطعات کف‌پوش.', formula: 'آسفالت: مساحت × ضخامت × چگالی | کاشی: مساحت ÷ مساحت هر قطعه', inputs: [_InputSpec('area', 'مساحت اجرا', 'مترمربع'), _InputSpec('thickness', 'ضخامت آسفالت', 'سانتی‌متر', initial: '5'), _InputSpec('density', 'چگالی آسفالت', 'کیلوگرم بر مترمکعب', initial: '2300'), _InputSpec('tileArea', 'مساحت هر کاشی/سرامیک', 'مترمربع', initial: '0.36'), _InputSpec('waste', 'درصد پرت کاشی', 'درصد', initial: '10')], resultUnit: 'کیلوگرم آسفالت و تعداد قطعه', warning: 'برای آسفالت، چگالی را از طرح اختلاط/مشخصات پیمان بگیرید. تعداد کاشی با گرد کردن به بالا و افزودن پرت محاسبه می‌شود.'),
-];
+
+  _EstimateSpec(id:21,title:'حجم به فرغون و میکسر',description:'تخمین تعداد بار فرغون و سهم ظرفیت میکسر.',formula:'حجم × ۱۰۰۰ ÷ ظرفیت',inputs:[_InputSpec('volume','حجم','مترمکعب'),_InputSpec('wheel','ظرفیت فرغون','لیتر',initial:'90'),_InputSpec('mixer','ظرفیت مفید میکسر','لیتر',initial:'350')],resultUnit:'بار'),
+  _EstimateSpec(id:22,title:'خاک‌برداری با تورم خاک',description:'حجم درجا، حجم سست‌شده و سرویس حمل.',formula:'طول × عرض × عمق × ضریب تورم',inputs:[_InputSpec('length','طول','متر'),_InputSpec('width','عرض','متر'),_InputSpec('depth','عمق متوسط','متر'),_InputSpec('factor','ضریب تورم','ضریب',initial:'1.25'),_InputSpec('truck','ظرفیت کامیون','مترمکعب',initial:'10')],resultUnit:'مترمکعب'),
+  _EstimateSpec(id:23,title:'سرانه کل بتن سازه',description:'حجم بتن کل از روی زیربنا و سرانه مصرف.',formula:'زیربنا × سرانه بتن',inputs:[_InputSpec('area','زیربنای کل','مترمربع'),_InputSpec('rate','سرانه بتن','مترمکعب بر مترمربع',initial:'0.40')],resultUnit:'مترمکعب بتن',warning:'بازه ۰٫۳۵ تا ۰٫۴۵ صرفاً تخمین اولیه ساختمان متعارف است.'),
+  _EstimateSpec(id:24,title:'مصالح سنگی بتن',description:'تخمین شن، ماسه و وزن کل مصالح سنگی.',formula:'حجم بتن × ضرایب مصرف',inputs:[_InputSpec('volume','حجم بتن','مترمکعب'),_InputSpec('total','مصالح سنگی کل','کیلوگرم بر مترمکعب',initial:'2200'),_InputSpec('gravel','شن','مترمکعب بر مترمکعب بتن',initial:'0.80'),_InputSpec('sand','ماسه','مترمکعب بر مترمکعب بتن',initial:'0.45')],resultUnit:'کیلوگرم و مترمکعب'),
+  _EstimateSpec(id:25,title:'سرانه میلگرد قاب خمشی',description:'برآورد میلگرد سازه بتنی بر اساس سرانه.',formula:'زیربنا × سرانه میلگرد',inputs:[_InputSpec('area','زیربنای کل','مترمربع'),_InputSpec('rate','سرانه میلگرد','کیلوگرم بر مترمربع',initial:'55')],resultUnit:'کیلوگرم',warning:'بازه ۴۵ تا ۷۰ کیلوگرم فقط تخمین اولیه است؛ لیستوفر ملاک سفارش است.'),
+  _EstimateSpec(id:26,title:'ملات کف‌سازی با سرانه',description:'محاسبه ملات کف با نرخ مصرف قابل ویرایش.',formula:'مساحت × لیتر بر مترمربع',inputs:[_InputSpec('area','مساحت کف','مترمربع'),_InputSpec('rate','مصرف ملات','لیتر بر مترمربع',initial:'30')],resultUnit:'لیتر ملات'),
+  _EstimateSpec(id:27,title:'ماسه ملات فرش کف',description:'تخمین ماسه بر اساس حجم ملات.',formula:'حجم ملات × سرانه ماسه',inputs:[_InputSpec('volume','حجم ملات','مترمکعب'),_InputSpec('rate','ماسه','کیلوگرم بر مترمکعب',initial:'1670')],resultUnit:'کیلوگرم ماسه'),
+  _EstimateSpec(id:28,title:'لوله گرمایش از کف',description:'تخمین طول لوله موردنیاز سطح تحت پوشش.',formula:'مساحت × طول لوله در مترمربع',inputs:[_InputSpec('area','مساحت تحت پوشش','مترمربع'),_InputSpec('rate','طول لوله','متر بر مترمربع',initial:'3')],resultUnit:'متر لوله',warning:'فاصله لوله‌ها و طول مجاز مدار باید در طراحی کنترل شود.'),
+  _EstimateSpec(id:29,title:'تیرچه سقف تیرچه‌بلوک',description:'تخمین مجموع طول تیرچه‌ها از مساحت سقف.',formula:'مساحت × ضریب طول تیرچه',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('rate','ضریب طول','متر بر مترمربع',initial:'1.5')],resultUnit:'متر طول تیرچه'),
+  _EstimateSpec(id:30,title:'بلوک یا یونولیت سقف',description:'تخمین تعداد بلوک سقفی.',formula:'مساحت × تعداد در مترمربع',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('rate','تعداد در مترمربع','عدد',initial:'0.68')],resultUnit:'عدد بلوک'),
+  _EstimateSpec(id:31,title:'بتن سقف تیرچه‌بلوک',description:'تخمین بتن مصرفی سقف سبک.',formula:'مساحت × مصرف بتن',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('rate','مصرف بتن','مترمکعب بر مترمربع',initial:'0.095')],resultUnit:'مترمکعب بتن'),
+  _EstimateSpec(id:32,title:'ورق و بتن سقف عرشه فولادی',description:'محاسبه ورق با پرت و بتن با ضخامت مؤثر.',formula:'ورق=مساحت×(۱+پرت)؛ بتن=مساحت×(ضخامت−نصف گوه)',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('waste','پرت ورق','درصد',initial:'7'),_InputSpec('slab','ضخامت دال','متر',initial:'0.12'),_InputSpec('deck','ارتفاع گوه عرشه','متر',initial:'0.075')],resultUnit:'مترمربع ورق و مترمکعب بتن'),
+  _EstimateSpec(id:33,title:'سقف دال مجوف یوبوت/کوبیاکس',description:'تخمین تعداد قالب و بتن با ضخامت معادل.',formula:'قالب=مساحت÷شبکه؛ بتن=مساحت×ضخامت معادل',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('module','مساحت شبکه هر قالب','مترمربع',initial:'0.25'),_InputSpec('waste','پرت قالب','درصد',initial:'4'),_InputSpec('thickness','ضخامت معادل بتن','متر',initial:'0.18')],resultUnit:'عدد قالب و مترمکعب بتن',warning:'ضخامت معادل و چیدمان قالب باید از نقشه سیستم استخراج شود.'),
+  _EstimateSpec(id:34,title:'ملات دیوارچینی با ضریب حجمی',description:'محاسبه ملات با سهم حجمی قابل تنظیم.',formula:'حجم دیوار × سهم ملات',inputs:[_InputSpec('wall','حجم دیوار','مترمکعب'),_InputSpec('factor','سهم ملات','ضریب',initial:'0.33')],resultUnit:'مترمکعب ملات',warning:'سهم یک‌سوم برای همه انواع بلوک و آجر قابل تعمیم نیست.'),
+  _EstimateSpec(id:35,title:'سیمان و ماسه ملات ۱ به ۶',description:'تخمین اجزای ملات دیوارچینی.',formula:'حجم ملات × سرانه مصالح',inputs:[_InputSpec('volume','حجم ملات','مترمکعب'),_InputSpec('cement','سیمان','کیلوگرم بر مترمکعب',initial:'300'),_InputSpec('sand','ماسه','کیلوگرم بر مترمکعب',initial:'1800')],resultUnit:'کیلوگرم'),
+  _EstimateSpec(id:36,title:'آجر بر اساس حجم دیوار',description:'تخمین تعداد آجر در حجم دیوار.',formula:'حجم دیوار × تعداد آجر در مترمکعب',inputs:[_InputSpec('volume','حجم دیوار','مترمکعب'),_InputSpec('rate','تعداد آجر','عدد بر مترمکعب',initial:'610')],resultUnit:'عدد آجر'),
+  _EstimateSpec(id:37,title:'بلوک سیمانی یا سفالی تیغه',description:'تعداد بلوک با کسر بازشو و افزودن پرت.',formula:'(مساحت−بازشو)÷مساحت بلوک×(۱+پرت)',inputs:[_InputSpec('area','مساحت دیوار','مترمربع'),_InputSpec('openings','مساحت بازشو','مترمربع',initial:'0'),_InputSpec('block','مساحت نمای بلوک','مترمربع',initial:'0.08'),_InputSpec('waste','پرت','درصد',initial:'6')],resultUnit:'عدد بلوک'),
+  _EstimateSpec(id:38,title:'لوله آب سرد و گرم',description:'تخمین طول لوله‌کشی آب بر اساس زیربنا.',formula:'زیربنا × سرانه طول لوله',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه لوله','متر بر مترمربع',initial:'0.55')],resultUnit:'متر لوله'),
+  _EstimateSpec(id:39,title:'لوله فاضلاب، باران و هواکش',description:'تخمین طول لوله‌های فاضلاب و تهویه.',formula:'زیربنا × سرانه طول لوله',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه لوله','متر بر مترمربع',initial:'0.65')],resultUnit:'متر لوله'),
+  _EstimateSpec(id:40,title:'مصالح خشک اندودکاری',description:'تخمین مصالح خشک بر اساس حجم اندود.',formula:'حجم اندود × سرانه مصالح خشک',inputs:[_InputSpec('volume','حجم اندود','مترمکعب'),_InputSpec('rate','مصالح خشک','کیلوگرم بر مترمکعب',initial:'1850')],resultUnit:'کیلوگرم مصالح'),
+  _EstimateSpec(id:41,title:'پوشش گچ و خاک',description:'تعداد کیسه ۴۰ کیلویی بر اساس سطح و پرت.',formula:'مساحت÷پوشش هر کیسه×(۱+پرت)',inputs:[_InputSpec('area','سطح','مترمربع'),_InputSpec('coverage','پوشش هر کیسه','مترمربع',initial:'2.8'),_InputSpec('waste','پرت','درصد',initial:'5')],resultUnit:'کیسه ۴۰ کیلویی'),
+  _EstimateSpec(id:42,title:'پوشش گچ سفیدکاری',description:'تعداد کیسه گچ سفید ۴۰ کیلویی.',formula:'مساحت÷پوشش هر کیسه×(۱+پرت)',inputs:[_InputSpec('area','سطح','مترمربع'),_InputSpec('coverage','پوشش هر کیسه','مترمربع',initial:'11'),_InputSpec('waste','پرت','درصد',initial:'5')],resultUnit:'کیسه ۴۰ کیلویی'),
+  _EstimateSpec(id:43,title:'کناف و سقف کاذب',description:'تخمین ورق، پیچ و شاخص طول سازه فرعی.',formula:'ورق=سطح×(۱+پرت)؛ پیچ=سطح×تعداد؛ پروفیل تقریبی=سطح×۱۰۰÷فاصله',inputs:[_InputSpec('area','سطح','مترمربع'),_InputSpec('waste','پرت ورق','درصد',initial:'10'),_InputSpec('screws','پیچ در مترمربع','عدد',initial:'28'),_InputSpec('spacing','فاصله سازه فرعی','سانتی‌متر',initial:'50')],resultUnit:'مترمربع ورق، عدد پیچ و متر طول تقریبی',warning:'متره پروفیل واقعی به نوع سیستم و نقشه زیرسازی وابسته است.'),
+  _EstimateSpec(id:44,title:'رنگ روغنی دو دست',description:'مقدار رنگ با پوشش هر کیلو در هر دست و پرت.',formula:'مساحت×دست÷پوشش×(۱+پرت)',inputs:[_InputSpec('area','مساحت','مترمربع'),_InputSpec('coverage','پوشش هر کیلو در یک دست','مترمربع',initial:'5'),_InputSpec('coats','تعداد دست','عدد',initial:'2'),_InputSpec('waste','پرت','درصد',initial:'15')],resultUnit:'کیلوگرم رنگ'),
+  _EstimateSpec(id:45,title:'رنگ پلاستیک و آکریلیک',description:'مقدار رنگ با لحاظ مصرف بیشتر زیرکار جاذب.',formula:'مساحت×دست÷پوشش×(۱+افزایش مصرف)',inputs:[_InputSpec('area','مساحت','مترمربع'),_InputSpec('coverage','پوشش هر کیلو در یک دست','مترمربع',initial:'7'),_InputSpec('coats','تعداد دست','عدد',initial:'2'),_InputSpec('extra','افزایش مصرف','درصد',initial:'15')],resultUnit:'کیلوگرم رنگ'),
+  _EstimateSpec(id:46,title:'آجر نمای پلاک و ملات بندکشی',description:'تخمین کارتن آجر ال و کیسه ملات بندکشی.',formula:'کارتن=مساحت÷پوشش کارتن؛ کیسه=مساحت÷پوشش کیسه',inputs:[_InputSpec('area','مساحت نما','مترمربع'),_InputSpec('carton','پوشش هر کارتن ال','مترمربع',initial:'5'),_InputSpec('mortar','پوشش هر کیسه ۵۰ کیلویی','مترمربع',initial:'40')],resultUnit:'کارتن و کیسه'),
+  _EstimateSpec(id:47,title:'پرت کاشی، سرامیک و سنگ',description:'محاسبه مساحت سفارش با درصد پرت انتخابی.',formula:'مساحت خالص×(۱+پرت)',inputs:[_InputSpec('area','مساحت خالص','مترمربع'),_InputSpec('waste','پرت','درصد',initial:'7')],resultUnit:'مترمربع سفارش'),
+  _EstimateSpec(id:48,title:'ظرفیت گرمایشی و پره رادیاتور',description:'تخمین بار گرمایشی و تعداد پره.',formula:'توان=مساحت×وات بر مترمربع؛ پره=توان÷توان هر پره',inputs:[_InputSpec('area','مساحت مفید','مترمربع'),_InputSpec('rate','بار گرمایشی','وات بر مترمربع',initial:'155'),_InputSpec('fin','توان هر پره','وات',initial:'150')],resultUnit:'وات و تعداد پره'),
+  _EstimateSpec(id:49,title:'سیم‌کشی و تجهیزات برق',description:'تخمین طول سیم و تعداد کلید و پریز.',formula:'زیربنا×سرانه سیم',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه سیم','متر بر مترمربع',initial:'5'),_InputSpec('points','تعداد کلید و پریز','عدد',initial:'30')],resultUnit:'متر سیم و عدد تجهیزات'),
+  _EstimateSpec(id:50,title:'بلوک‌چینی با مساحت خالص',description:'محاسبه بلوک با کسر بازشو و افزودن پرت.',formula:'(مساحت−بازشو)÷مساحت بلوک×(۱+پرت)',inputs:[_InputSpec('area','مساحت دیوار','مترمربع'),_InputSpec('openings','مساحت بازشو','مترمربع',initial:'0'),_InputSpec('block','مساحت نمای بلوک','مترمربع',initial:'0.08'),_InputSpec('waste','پرت','درصد',initial:'6')],resultUnit:'عدد بلوک'),
+]; 
 
 class QuickEstimatesPage extends StatelessWidget {
   const QuickEstimatesPage({super.key});
@@ -64,7 +95,7 @@ class QuickEstimatesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('۲۰ محاسبه سرانگشتی ساختمان')),
+      appBar: AppBar(title: const Text('۵۰ محاسبه سرانگشتی ساختمان')),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: _estimates.length,
@@ -167,6 +198,81 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
         case 13:
           result = '${(v('length') * v('width') * v('height')).toStringAsFixed(3)} مترمکعب';
           result += '\nبرای استوانه: ${(math.pi * math.pow(v('width') / 2, 2) * v('height')).toStringAsFixed(3)} مترمکعب (قطر = عرض)';
+
+        case 21:
+          result = 'فرغون: ${(v('volume') * 1000 / v('wheel')).ceil()} بار\\nمیکسر: ${(v('volume') * 1000 / v('mixer')).toStringAsFixed(2)} بار';
+          break;
+        case 22:
+          final bank = v('length') * v('width') * v('depth');
+          final loose = bank * v('factor');
+          result = 'حجم درجا: ${bank.toStringAsFixed(2)} مترمکعب\\nحجم با تورم: ${loose.toStringAsFixed(2)} مترمکعب\\nکامیون: ${(loose / v('truck')).ceil()} سرویس';
+          break;
+        case 23:
+        case 25:
+        case 26:
+        case 28:
+        case 29:
+        case 30:
+        case 31:
+        case 38:
+        case 39:
+        case 40:
+          final amount = v('area') * v('rate');
+          result = '${amount.toStringAsFixed(2)} ${widget.spec.resultUnit}';
+          if (widget.spec.id == 25 || widget.spec.id == 40) result += ' (حدود ${(amount / 1000).toStringAsFixed(3)} تن)';
+          if (widget.spec.id == 26) result += '\\nمعادل ${(amount / 1000).toStringAsFixed(3)} مترمکعب';
+          break;
+        case 24:
+          result = 'مصالح سنگی کل: ${(v('volume') * v('total')).toStringAsFixed(1)} کیلوگرم\\nشن: ${(v('volume') * v('gravel')).toStringAsFixed(2)} مترمکعب\\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(2)} مترمکعب';
+          break;
+        case 32:
+          final eff = v('slab') - v('deck') / 2;
+          if (eff <= 0) throw const FormatException('ضخامت مؤثر بتن باید مثبت باشد.');
+          result = 'ورق با پرت: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\\nبتن: ${(v('area') * eff).toStringAsFixed(3)} مترمکعب';
+          break;
+        case 33:
+          result = 'قالب: ${(v('area') / v('module') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد\\nبتن: ${(v('area') * v('thickness')).toStringAsFixed(3)} مترمکعب';
+          break;
+        case 34:
+          result = '${(v('wall') * v('factor')).toStringAsFixed(3)} مترمکعب ملات';
+          break;
+        case 35:
+          result = 'سیمان: ${(v('volume') * v('cement')).toStringAsFixed(1)} کیلوگرم\\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(1)} کیلوگرم';
+          break;
+        case 36:
+          result = '${(v('volume') * v('rate')).ceil()} عدد آجر';
+          break;
+        case 37:
+        case 50:
+          final net = v('area') - _value('openings', allowZero: true);
+          if (net <= 0) throw const FormatException('مساحت خالص دیوار باید مثبت باشد.');
+          result = '${(net / v('block') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد بلوک';
+          break;
+        case 41:
+        case 42:
+          result = '${(v('area') / v('coverage') * (1 + v('waste', allowZero: true) / 100)).ceil()} کیسه ۴۰ کیلویی';
+          break;
+        case 43:
+          result = 'ورق: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\\nپیچ: ${(v('area') * v('screws')).ceil()} عدد\\nشاخص طول سازه فرعی: ${(v('area') * 100 / v('spacing')).toStringAsFixed(1)} متر';
+          break;
+        case 44:
+        case 45:
+          final extra = widget.spec.id == 44 ? v('waste', allowZero: true) : v('extra', allowZero: true);
+          result = '${(v('area') * v('coats') / v('coverage') * (1 + extra / 100)).toStringAsFixed(2)} کیلوگرم رنگ';
+          break;
+        case 46:
+          result = 'کارتن آجر ال: ${(v('area') / v('carton')).ceil()}\\nکیسه بندکشی: ${(v('area') / v('mortar')).ceil()}';
+          break;
+        case 47:
+          result = '${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع سفارش';
+          break;
+        case 48:
+          final watts = v('area') * v('rate');
+          result = 'بار گرمایشی: ${watts.toStringAsFixed(0)} وات\\nپره رادیاتور: ${(watts / v('fin')).ceil()} عدد';
+          break;
+        case 49:
+          result = 'طول سیم: ${(v('area') * v('rate')).toStringAsFixed(1)} متر\\nکلید و پریز: ${v('points').ceil()} عدد';
+          break;
         case 20:
           final asphaltKg = v('area') * v('thickness') / 100 * v('density');
           final tiles = (v('area') / v('tileArea') * (1 + _value('waste', allowZero: true) / 100)).ceil();
