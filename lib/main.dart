@@ -17,6 +17,12 @@ class MetreYarApp extends StatelessWidget {
       seedColor: _gold,
       brightness: Brightness.dark,
       surface: const Color(0xFF1B2940),
+    ).copyWith(
+      primary: _gold,
+      secondary: const Color(0xFFB9C5D6),
+      surface: const Color(0xFF1B2940),
+      onSurface: const Color(0xFFF2F4F8),
+      outline: const Color(0xFF52627A),
     );
     return MaterialApp(
       title: 'متره‌وبرآوردیار',
@@ -25,12 +31,30 @@ class MetreYarApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: scheme,
         scaffoldBackgroundColor: _navy,
+        visualDensity: VisualDensity.standard,
+        dividerTheme: const DividerThemeData(color: Color(0xFF34445D), thickness: 1),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: const Color(0xFF1B2940),
+          indicatorColor: _gold.withValues(alpha: 0.18),
+          labelTextStyle: WidgetStateProperty.all(const TextStyle(fontWeight: FontWeight.w600)),
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: _navy,
           foregroundColor: _silver,
           centerTitle: true,
+          elevation: 0,
+          titleTextStyle: const TextStyle(color: _silver, fontSize: 18, fontWeight: FontWeight.w800),
         ),
-        cardTheme: const CardThemeData(color: Color(0xFF1B2940)),
+        cardTheme: CardThemeData(
+          color: const Color(0xFF1B2940),
+          elevation: 2,
+          shadowColor: Colors.black.withValues(alpha: 0.22),
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: const BorderSide(color: Color(0xFF34445D), width: 0.7),
+          ),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFF24344D),
@@ -68,61 +92,79 @@ class HomePage extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF263A58), Color(0xFF17243A)],
+                  colors: [Color(0xFF344B6C), Color(0xFF1B2940), Color(0xFF142033)],
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
                 ),
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(color: _gold.withValues(alpha: 0.55)),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: _gold.withValues(alpha: 0.65)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.22), blurRadius: 22, offset: const Offset(0, 10)),
+                ],
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ابزار هوشمند دفتر فنی', style: TextStyle(color: _gold, fontSize: 13)),
-                  SizedBox(height: 10),
-                  Text(
-                    'متره، محاسبه و برآورد پروژه‌های ساختمانی',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.6),
-                  ),
+                  Row(children: [
+                    Icon(Icons.architecture_rounded, color: _gold, size: 22),
+                    SizedBox(width: 8),
+                    Text('ENGINE PLUS  |  دفتر فنی هوشمند', style: TextStyle(color: _gold, fontSize: 11, letterSpacing: 0.6, fontWeight: FontWeight.w700)),
+                  ]),
+                  SizedBox(height: 16),
+                  Text('متره و برآورد، دقیق‌تر و سریع‌تر', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.5)),
                   SizedBox(height: 8),
-                  Text('محاسبات پایه به‌صورت آفلاین در دسترس شماست.',
-                      style: TextStyle(color: _silver, height: 1.5)),
+                  Text('ابزارهای کاربردی پروژه‌های ساختمانی را در سه گروه تخصصی در اختیار داشته باشید.', style: TextStyle(color: _silver, height: 1.7, fontSize: 13)),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            const Text('دسترسی سریع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 26),
+            const Row(
+              children: [
+                Text('دسترسی سریع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                SizedBox(width: 8),
+                Expanded(child: Divider(color: Color(0xFF52627A))),
+              ],
+            ),
+            const SizedBox(height: 13),
             _ToolCard(
-              icon: Icons.view_in_ar_outlined,
-              title: 'حجم بتن',
-              subtitle: 'محاسبه حجم فونداسیون، ستون و تیر',
-              onTap: () => _openCalculator(context, quickEstimatePage(51)),
+              icon: Icons.foundation_rounded,
+              title: 'بتن و سفت‌کاری',
+              subtitle: 'بتن‌ریزی، آرماتور و عملیات بنایی',
+              onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0)),
             ),
             _ToolCard(
-              icon: Icons.straighten,
-              title: 'وزن میلگرد',
-              subtitle: 'برآورد وزن بر اساس قطر و طول',
-              onTap: () => _openCalculator(context, quickEstimatePage(52)),
+              icon: Icons.format_paint_rounded,
+              title: 'نازک‌کاری',
+              subtitle: 'کف‌سازی، اندود، رنگ و پوشش‌ها',
+              onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 1)),
             ),
             _ToolCard(
-              icon: Icons.square_foot,
-              title: 'مساحت',
-              subtitle: 'محاسبه مساحت سطوح مستطیلی',
-              onTap: () => _openCalculator(context, quickEstimatePage(53)),
+              icon: Icons.electrical_services_rounded,
+              title: 'تأسیسات',
+              subtitle: 'محاسبات تأسیسات مکانیکی و برقی',
+              onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 2)),
             ),
-            _ToolCard(
-              icon: Icons.construction_outlined,
-              title: 'همه ابزارهای متره و برآورد',
-              subtitle: 'دسته‌بندی‌شده در سه تب اصلی',
-              onTap: () => _openCalculator(context, const QuickEstimatesPage()),
+            const SizedBox(height: 14),
+            Card(
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                leading: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(color: _gold.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(13)),
+                  child: const Icon(Icons.grid_view_rounded, color: _gold),
+                ),
+                title: const Text('فهرست کامل ۵۳ ابزار', style: TextStyle(fontWeight: FontWeight.w800)),
+                subtitle: const Text('مشاهده همه محاسبات و راهنماهای مهندسی', style: TextStyle(color: _silver)),
+                trailing: const Icon(Icons.chevron_left_rounded, color: _gold),
+                onTap: () => _openCalculator(context, const QuickEstimatesPage()),
+              ),
             ),
             const SizedBox(height: 18),
             const Center(
-              child: Text('نسخه 1.2.2  •  اینجین پلاس',
+              child: Text('نسخه 1.2.4  •  اینجین پلاس',
                   style: TextStyle(color: _silver, fontSize: 12)),
             ),
           ],
@@ -154,14 +196,15 @@ class _ToolCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         leading: CircleAvatar(
+          radius: 23,
           backgroundColor: _gold.withValues(alpha: 0.14),
           child: Icon(icon, color: _gold),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
         subtitle: Text(subtitle, style: const TextStyle(color: _silver)),
-        trailing: const Icon(Icons.chevron_left, color: _gold),
+        trailing: const Icon(Icons.arrow_back_ios_new_rounded, color: _gold, size: 16),
         onTap: onTap,
       ),
     );
