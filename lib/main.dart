@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/calculations.dart';
 import 'quick_estimates.dart';
 
@@ -6,209 +7,279 @@ const _navy = Color(0xFF101B2D);
 const _gold = Color(0xFFD6AD55);
 const _silver = Color(0xFFD9DEE7);
 
+class _AppPalette {
+  const _AppPalette(this.name, this.subtitle, this.background, this.surface, this.primary, this.secondary, this.accent, this.onSurface);
+  final String name, subtitle;
+  final Color background, surface, primary, secondary, accent, onSurface;
+}
+
+const _palettes = <String, _AppPalette>{
+  'midnight': _AppPalette('سرمه‌ای و طلایی', 'تم اصلی اینجین پلاس', Color(0xFF101B2D), Color(0xFF1B2940), Color(0xFFD6AD55), Color(0xFFB9C5D6), Color(0xFF52627A), Color(0xFFF2F4F8)),
+  'concrete': _AppPalette('خاکستری صنعتی / بتنی', 'Industrial Concrete', Color(0xFF2F3640), Color(0xFF46505C), Color(0xFFE67E22), Color(0xFFDCDDE1), Color(0xFF7F8C8D), Color(0xFFFFFFFF)),
+  'blueprint': _AppPalette('آبی مهندسی / نقشه فنی', 'Engineering Blueprint', Color(0xFF1B3A5C), Color(0xFF244D73), Color(0xFFF1C40F), Color(0xFFD6EAF8), Color(0xFF3498DB), Color(0xFFFFFFFF)),
+  'green': _AppPalette('سبز ایمنی / پایداری', 'Safety Green', Color(0xFF1E5631), Color(0xFF2B7042), Color(0xFFC0392B), Color(0xFFD5F5E3), Color(0xFF4C9A2A), Color(0xFFFFFFFF)),
+  'fire': _AppPalette('قرمز-خاکستری هشدار', 'Fire Hazard', Color(0xFF922B21), Color(0xFF34495E), Color(0xFFF39C12), Color(0xFFEAECEE), Color(0xFFE74C3C), Color(0xFFFFFFFF)),
+};
+
 void main() => runApp(const MetreYarApp());
 
-class MetreYarApp extends StatelessWidget {
+class MetreYarApp extends StatefulWidget {
   const MetreYarApp({super.key});
+  @override
+  State<MetreYarApp> createState() => _MetreYarAppState();
+}
+
+class _MetreYarAppState extends State<MetreYarApp> {
+  String _themeKey = 'midnight';
+  Map<String, String> _profile = {'firstName': '', 'lastName': '', 'phone': '', 'field': '', 'jobTitle': '', 'city': '', 'avatar': 'engineering'};
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _themeKey = _palettes.containsKey(prefs.getString('themeKey')) ? prefs.getString('themeKey')! : 'midnight';
+      for (final key in _profile.keys.toList()) {
+        _profile[key] = prefs.getString('profile.$key') ?? '';
+      }
+      if (_profile['avatar']!.isEmpty) _profile['avatar'] = 'engineering';
+      _loaded = true;
+    });
+  }
+
+  Future<void> _saveTheme(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('themeKey', key);
+    if (mounted) setState(() => _themeKey = key);
+  }
+
+  Future<void> _saveProfile(Map<String, String> value) async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final entry in value.entries) {
+      await prefs.setString('profile.${entry.key}', entry.value);
+    }
+    if (mounted) setState(() => _profile = Map<String, String>.from(value));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: _gold,
-      brightness: Brightness.dark,
-      surface: const Color(0xFF1B2940),
-    ).copyWith(
-      primary: _gold,
-      secondary: const Color(0xFFB9C5D6),
-      surface: const Color(0xFF1B2940),
-      onSurface: const Color(0xFFF2F4F8),
-      outline: const Color(0xFF52627A),
+    final palette = _palettes[_themeKey]!;
+    final scheme = ColorScheme.fromSeed(seedColor: palette.primary, brightness: Brightness.dark, surface: palette.surface).copyWith(
+      primary: palette.primary, secondary: palette.secondary, surface: palette.surface,
+      onSurface: palette.onSurface, outline: palette.accent,
     );
     return MaterialApp(
-      title: 'متره‌وبرآوردیار',
-      debugShowCheckedModeBanner: false,
+      title: 'متره‌وبرآوردیار', debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: scheme,
-        scaffoldBackgroundColor: _navy,
+        useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: palette.background,
         visualDensity: VisualDensity.standard,
-        dividerTheme: const DividerThemeData(color: Color(0xFF34445D), thickness: 1),
-        navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: const Color(0xFF1B2940),
-          indicatorColor: _gold.withValues(alpha: 0.18),
-          labelTextStyle: WidgetStateProperty.all(const TextStyle(fontWeight: FontWeight.w600)),
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: _navy,
-          foregroundColor: _silver,
-          centerTitle: true,
-          elevation: 0,
-          titleTextStyle: const TextStyle(color: _silver, fontSize: 18, fontWeight: FontWeight.w800),
-        ),
-        cardTheme: CardThemeData(
-          color: const Color(0xFF1B2940),
-          elevation: 2,
-          shadowColor: Colors.black.withValues(alpha: 0.22),
-          margin: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: Color(0xFF34445D), width: 0.7),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFF24344D),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide.none,
-          ),
-          labelStyle: const TextStyle(color: _silver),
-        ),
+        dividerTheme: DividerThemeData(color: palette.accent.withValues(alpha: .7), thickness: 1),
+        appBarTheme: AppBarTheme(backgroundColor: palette.background, foregroundColor: palette.onSurface, centerTitle: true, elevation: 0,
+          titleTextStyle: TextStyle(color: palette.onSurface, fontSize: 18, fontWeight: FontWeight.w800)),
+        cardTheme: CardThemeData(color: palette.surface, elevation: 3, shadowColor: Colors.black.withValues(alpha: .25), margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: BorderSide(color: palette.accent.withValues(alpha: .75), width: .7))),
+        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: palette.surface.withValues(alpha: .9),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          labelStyle: TextStyle(color: palette.secondary)),
+        navigationBarTheme: NavigationBarThemeData(backgroundColor: palette.surface, indicatorColor: palette.primary.withValues(alpha: .18)),
       ),
-      home: const Directionality(
-        textDirection: TextDirection.rtl,
-        child: HomePage(),
-      ),
+      home: Directionality(textDirection: TextDirection.rtl, child: _loaded
+        ? HomePage(profile: _profile, palette: palette,
+            onOpenSettings: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SettingsPage(
+              selectedTheme: _themeKey, profile: _profile, onThemeChanged: _saveTheme, onProfileSaved: _saveProfile))))
+        : const Scaffold(body: Center(child: CircularProgressIndicator()))),
     );
   }
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required this.profile, required this.palette, required this.onOpenSettings});
+  final Map<String, String> profile;
+  final _AppPalette palette;
+  final VoidCallback onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
+    final fullName = '${profile['firstName'] ?? ''} ${profile['lastName'] ?? ''}'.trim();
+    final avatar = _avatarFor(profile['avatar'] ?? 'engineering');
     return Scaffold(
       appBar: AppBar(
-        title: const Column(
-          children: [
-            Text('متره‌وبرآوردیار', style: TextStyle(fontWeight: FontWeight.bold)),
-            Text('ENGINE PLUS', style: TextStyle(fontSize: 10, letterSpacing: 2, color: _gold)),
-          ],
-        ),
+        title: const Column(children: [Text('متره‌وبرآوردیار', style: TextStyle(fontWeight: FontWeight.bold)), Text('ENGINE PLUS', style: TextStyle(fontSize: 10, letterSpacing: 2))]),
+        actions: [IconButton(tooltip: 'تنظیمات و پروفایل', onPressed: onOpenSettings, icon: const Icon(Icons.settings_outlined))],
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(18),
-          children: [
-            Container(
-              padding: const EdgeInsets.all(22),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF344B6C), Color(0xFF1B2940), Color(0xFF142033)],
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: _gold.withValues(alpha: 0.65)),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.22), blurRadius: 22, offset: const Offset(0, 10)),
-                ],
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    Icon(Icons.architecture_rounded, color: _gold, size: 22),
-                    SizedBox(width: 8),
-                    Text('ENGINE PLUS  |  دفتر فنی هوشمند', style: TextStyle(color: _gold, fontSize: 11, letterSpacing: 0.6, fontWeight: FontWeight.w700)),
-                  ]),
-                  SizedBox(height: 16),
-                  Text('متره و برآورد، دقیق‌تر و سریع‌تر', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.5)),
-                  SizedBox(height: 8),
-                  Text('ابزارهای کاربردی پروژه‌های ساختمانی را در سه گروه تخصصی در اختیار داشته باشید.', style: TextStyle(color: _silver, height: 1.7, fontSize: 13)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 26),
-            const Row(
-              children: [
-                Text('دسترسی سریع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                SizedBox(width: 8),
-                Expanded(child: Divider(color: Color(0xFF52627A))),
-              ],
-            ),
-            const SizedBox(height: 13),
-            _ToolCard(
-              icon: Icons.foundation_rounded,
-              title: 'بتن و سفت‌کاری',
-              subtitle: 'بتن‌ریزی، آرماتور و عملیات بنایی',
-              onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0)),
-            ),
-            _ToolCard(
-              icon: Icons.format_paint_rounded,
-              title: 'نازک‌کاری',
-              subtitle: 'کف‌سازی، اندود، رنگ و پوشش‌ها',
-              onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 1)),
-            ),
-            _ToolCard(
-              icon: Icons.electrical_services_rounded,
-              title: 'تأسیسات',
-              subtitle: 'محاسبات تأسیسات مکانیکی و برقی',
-              onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 2)),
-            ),
-            const SizedBox(height: 14),
-            Card(
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: Container(
-                  width: 44, height: 44,
-                  decoration: BoxDecoration(color: _gold.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(13)),
-                  child: const Icon(Icons.grid_view_rounded, color: _gold),
-                ),
-                title: const Text('فهرست کامل ۵۳ ابزار', style: TextStyle(fontWeight: FontWeight.w800)),
-                subtitle: const Text('مشاهده همه محاسبات و راهنماهای مهندسی', style: TextStyle(color: _silver)),
-                trailing: const Icon(Icons.chevron_left_rounded, color: _gold),
-                onTap: () => _openCalculator(context, const QuickEstimatesPage()),
-              ),
-            ),
-            const SizedBox(height: 18),
-            const Center(
-              child: Text('نسخه 1.2.4  •  اینجین پلاس',
-                  style: TextStyle(color: _silver, fontSize: 12)),
-            ),
-          ],
+      body: SafeArea(child: ListView(padding: const EdgeInsets.all(18), children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: onOpenSettings,
+          child: Card(child: Padding(padding: const EdgeInsets.all(14), child: Row(children: [
+            CircleAvatar(radius: 27, backgroundColor: palette.primary.withValues(alpha: .18), child: Text(avatar, style: const TextStyle(fontSize: 25))),
+            const SizedBox(width: 12),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(fullName.isEmpty ? 'مهندس گرامی، خوش آمدید' : 'سلام، $fullName', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+              Text(fullName.isEmpty ? 'برای تکمیل پروفایل لمس کنید' : (profile['field']?.isNotEmpty == true ? profile['field']! : 'دفتر فنی هوشمند اینجین پلاس'),
+                style: TextStyle(color: palette.secondary, fontSize: 12)),
+            ])),
+            Icon(Icons.edit_outlined, color: palette.primary),
+          ]))),
         ),
-      ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [palette.surface, palette.background], begin: Alignment.topRight, end: Alignment.bottomLeft),
+            borderRadius: BorderRadius.circular(24), border: Border.all(color: palette.primary.withValues(alpha: .75)),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: 22, offset: const Offset(0, 10))],
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [Icon(Icons.architecture_rounded, color: palette.primary, size: 22), const SizedBox(width: 8),
+              Text('ENGINE PLUS  |  دفتر فنی هوشمند', style: TextStyle(color: palette.primary, fontSize: 11, fontWeight: FontWeight.w700))]),
+            const SizedBox(height: 16),
+            const Text('متره و برآورد، دقیق‌تر و سریع‌تر', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.5)),
+            const SizedBox(height: 8),
+            Text('ابزارهای کاربردی پروژه‌های ساختمانی و محاسبات کارگاهی', style: TextStyle(color: palette.secondary, height: 1.7, fontSize: 13)),
+          ]),
+        ),
+        const SizedBox(height: 26),
+        const Row(children: [Text('دسترسی سریع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)), SizedBox(width: 8), Expanded(child: Divider())]),
+        const SizedBox(height: 13),
+        _ToolCard(icon: Icons.foundation_rounded, title: 'بتن و سفت‌کاری', subtitle: 'بتن‌ریزی، آرماتور و عملیات بنایی',
+          onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0))),
+        _ToolCard(icon: Icons.format_paint_rounded, title: 'نازک‌کاری', subtitle: 'کف‌سازی، اندود، رنگ و پوشش‌ها',
+          onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 1))),
+        _ToolCard(icon: Icons.electrical_services_rounded, title: 'تأسیسات', subtitle: 'محاسبات تأسیسات مکانیکی و برقی',
+          onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 2))),
+        const SizedBox(height: 14),
+        Card(child: ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: CircleAvatar(backgroundColor: palette.primary.withValues(alpha: .15), child: Icon(Icons.grid_view_rounded, color: palette.primary)),
+          title: const Text('فهرست کامل ۵۳ ابزار', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('مشاهده همه محاسبات و راهنماهای مهندسی'),
+          trailing: const Icon(Icons.chevron_left_rounded), onTap: () => _openCalculator(context, const QuickEstimatesPage()))),
+        const SizedBox(height: 18),
+        Center(child: Text('نسخه 1.2.5  •  اینجین پلاس', style: TextStyle(color: palette.secondary, fontSize: 12))),
+      ])),
     );
   }
 
-  void _openCalculator(BuildContext context, Widget page) {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+  void _openCalculator(BuildContext context, Widget page) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key, required this.selectedTheme, required this.profile, required this.onThemeChanged, required this.onProfileSaved});
+  final String selectedTheme;
+  final Map<String, String> profile;
+  final ValueChanged<String> onThemeChanged;
+  final Future<void> Function(Map<String, String>) onProfileSaved;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: AppBar(title: const Text('تنظیمات برنامه')),
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        const Text('انتخاب پوسته ظاهری', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 6),
+        const Text('با انتخاب هر تم، رنگ‌بندی بخش‌های اصلی برنامه تغییر می‌کند.'),
+        const SizedBox(height: 12),
+        for (final entry in _palettes.entries)
+          Card(child: ListTile(
+            leading: Container(width: 48, height: 42, decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10), gradient: LinearGradient(colors: [entry.value.background, entry.value.surface, entry.value.primary])),
+              child: const Icon(Icons.palette_outlined, color: Colors.white)),
+            title: Text(entry.value.name, style: const TextStyle(fontWeight: FontWeight.w800)),
+            subtitle: Text(entry.value.subtitle),
+            trailing: selectedTheme == entry.key ? Icon(Icons.check_circle, color: entry.value.primary) : const Icon(Icons.chevron_left),
+            onTap: () => onThemeChanged(entry.key),
+          )),
+        const SizedBox(height: 20),
+        Card(child: ListTile(leading: const Icon(Icons.person_outline), title: const Text('مشخصات کاربری', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('نام، تماس، رشته و آواتار'), trailing: const Icon(Icons.chevron_left),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfilePage(initialProfile: profile, onSaved: onProfileSaved))))),
+      ]));
+  }
+}
+
+const _avatars = <String, String>{'engineering': '👷', 'architect': '📐', 'builder': '🏗️', 'helmet': '⛑️', 'person': '👤', 'woman': '👩‍💼', 'man': '👨‍💼'};
+
+String _avatarFor(String key) => _avatars[key] ?? '👤';
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key, required this.initialProfile, required this.onSaved});
+  final Map<String, String> initialProfile;
+  final Future<void> Function(Map<String, String>) onSaved;
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late final Map<String, TextEditingController> _fields;
+  late String _avatar;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fields = {for (final key in ['firstName','lastName','phone','field','jobTitle','city']) key: TextEditingController(text: widget.initialProfile[key] ?? '')};
+    _avatar = widget.initialProfile['avatar'] ?? 'engineering';
+  }
+
+  @override
+  void dispose() { for (final c in _fields.values) { c.dispose(); } super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: AppBar(title: const Text('پروفایل کاربر')),
+      body: ListView(padding: const EdgeInsets.all(18), children: [
+        Center(child: Column(children: [
+          CircleAvatar(radius: 38, child: Text(_avatarFor(_avatar), style: const TextStyle(fontSize: 36))),
+          const SizedBox(height: 8), const Text('انتخاب آواتار', style: TextStyle(fontWeight: FontWeight.w800)),
+        ])),
+        const SizedBox(height: 8),
+        Wrap(alignment: WrapAlignment.center, spacing: 8, children: _avatars.entries.map((entry) => ChoiceChip(
+          label: Text(entry.value, style: const TextStyle(fontSize: 22)), selected: _avatar == entry.key,
+          onSelected: (_) => setState(() => _avatar = entry.key))).toList()),
+        const SizedBox(height: 18),
+        _field('firstName', 'نام', 'نام خود را وارد کنید'),
+        _field('lastName', 'نام خانوادگی', 'نام خانوادگی خود را وارد کنید'),
+        _field('phone', 'شماره تماس', 'مثلاً 09xxxxxxxxx', keyboard: TextInputType.phone),
+        _field('field', 'رشته تحصیلی / تخصص', 'مثلاً مهندسی عمران'),
+        _field('jobTitle', 'عنوان شغلی', 'مثلاً مهندس ناظر، مجری، مترور'),
+        _field('city', 'شهر محل فعالیت', 'نام شهر'),
+        const SizedBox(height: 12),
+        FilledButton.icon(onPressed: _saving ? null : _save, icon: const Icon(Icons.save_outlined),
+          label: Text(_saving ? 'در حال ذخیره...' : 'ذخیره مشخصات')),
+      ]));
+  }
+
+  Widget _field(String key, String label, String hint, {TextInputType keyboard = TextInputType.text}) =>
+    Padding(padding: const EdgeInsets.only(bottom: 12), child: TextField(controller: _fields[key], keyboardType: keyboard,
+      decoration: InputDecoration(labelText: label, hintText: hint)));
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    final data = {for (final entry in _fields.entries) entry.key: entry.value.text.trim(), 'avatar': _avatar};
+    await widget.onSaved(data);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('مشخصات کاربری ذخیره شد.')));
+    Navigator.of(context).pop();
   }
 }
 
 class _ToolCard extends StatelessWidget {
-  const _ToolCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
+  const _ToolCard({required this.icon, required this.title, required this.subtitle, required this.onTap});
+  final IconData icon; final String title; final String subtitle; final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-        leading: CircleAvatar(
-          radius: 23,
-          backgroundColor: _gold.withValues(alpha: 0.14),
-          child: Icon(icon, color: _gold),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-        subtitle: Text(subtitle, style: const TextStyle(color: _silver)),
-        trailing: const Icon(Icons.arrow_back_ios_new_rounded, color: _gold, size: 16),
-        onTap: onTap,
-      ),
-    );
-  }
+    final color = Theme.of(context).colorScheme.primary;
+    return Card(margin: const EdgeInsets.only(bottom: 10), child: ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+      leading: CircleAvatar(backgroundColor: color.withValues(alpha: .14), child: Icon(icon, color: color)),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
+      subtitle: Text(subtitle), trailing: const Icon(Icons.arrow_back_ios_new_rounded, size: 16), onTap: onTap));
 }
 
 abstract class _CalculatorPage extends StatefulWidget {
