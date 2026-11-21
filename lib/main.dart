@@ -116,13 +116,13 @@ class HomePage extends StatelessWidget {
             ),
             _ToolCard(
               icon: Icons.construction_outlined,
-              title: '۲۰ محاسبه سرانگشتی ساختمان',
+              title: '۵۰ محاسبه سرانگشتی ساختمان',
               subtitle: 'سازه، مصالح، بتن، معماری و تأسیسات',
               onTap: () => _openCalculator(context, const QuickEstimatesPage()),
             ),
             const SizedBox(height: 18),
             const Center(
-              child: Text('نسخه 1.1.0  •  اینجین پلاس',
+              child: Text('نسخه 1.2.1  •  اینجین پلاس',
                   style: TextStyle(color: _silver, fontSize: 12)),
             ),
           ],
