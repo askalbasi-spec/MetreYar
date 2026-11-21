@@ -280,6 +280,7 @@ class _ToolCard extends StatelessWidget {
       leading: CircleAvatar(backgroundColor: color.withValues(alpha: .14), child: Icon(icon, color: color)),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
       subtitle: Text(subtitle), trailing: const Icon(Icons.arrow_back_ios_new_rounded, size: 16), onTap: onTap));
+  }
 }
 
 abstract class _CalculatorPage extends StatefulWidget {
