@@ -89,35 +89,83 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id:50,title:'سیم‌کشی و تجهیزات برق',description:'تخمین طول سیم و تعداد کلید و پریز و تابلو.',formula:'زیربنا × سرانه سیم',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه سیم','متر بر مترمربع',initial:'5'),_InputSpec('points','تعداد کلید و پریز','عدد',initial:'30')],resultUnit:'متر سیم و عدد تجهیزات',warning:'طول واقعی به تعداد مدارها، رشته‌ها، مسیرها و نقشه برق وابسته است.'),
 ]; 
 
+String _categoryForEstimate(int id) {
+  if (<int>{13, 21, 23, 24, 31, 32, 33}.contains(id)) return 'بتن‌ریزی';
+  if (<int>{1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 22, 25, 29, 30, 34, 35, 36, 37}.contains(id)) return 'سفت‌کاری';
+  if (<int>{9, 10, 18, 19, 20, 26, 27, 40, 41, 42, 43, 44, 45, 46, 47}.contains(id)) return 'نازک‌کاری';
+  if (<int>{28, 38, 39, 48, 49}.contains(id)) return 'تأسیسات مکانیکی';
+  return 'تأسیسات برقی';
+}
+
 class QuickEstimatesPage extends StatelessWidget {
   const QuickEstimatesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('۵۰ محاسبه سرانگشتی ساختمان')),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: _estimates.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
-          final item = _estimates[index];
-          return Card(
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: _gold.withValues(alpha: .15),
-                child: Text('${item.id}', style: const TextStyle(color: _gold, fontWeight: FontWeight.bold)),
-              ),
-              title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text(item.description, style: const TextStyle(color: _silver)),
-              trailing: const Icon(Icons.chevron_left, color: _gold),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (_) => _EstimateDetailPage(spec: item),
-              )),
-            ),
-          );
-        },
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('۵۰ ابزار متره و برآورد'),
+          bottom: const TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(text: 'بتن و سفت‌کاری'),
+              Tab(text: 'نازک‌کاری'),
+              Tab(text: 'تأسیسات'),
+            ],
+          ),
+        ),
+        body: const TabBarView(
+          children: [
+            _EstimateTabGroup(categories: ['بتن‌ریزی', 'سفت‌کاری']),
+            _EstimateTabGroup(categories: ['نازک‌کاری']),
+            _EstimateTabGroup(categories: ['تأسیسات مکانیکی', 'تأسیسات برقی']),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _EstimateTabGroup extends StatelessWidget {
+  const _EstimateTabGroup({required this.categories});
+  final List<String> categories;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(12),
+      children: [
+        for (final category in categories) ...[
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(13),
+              child: Text(category, style: const TextStyle(color: _gold, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          for (final item in _estimates.where((e) => _categoryForEstimate(e.id) == category))
+            Card(
+              margin: const EdgeInsets.only(bottom: 7),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: _gold.withValues(alpha: .15),
+                  child: Text('${item.id}', style: const TextStyle(color: _gold, fontWeight: FontWeight.bold)),
+                ),
+                title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                  item.inputs.isEmpty ? 'راهنمای مهندسی — بدون محاسبه عددی' : item.description,
+                  style: const TextStyle(color: _silver),
+                ),
+                trailing: const Icon(Icons.chevron_left, color: _gold),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => _EstimateDetailPage(spec: item),
+                )),
+              ),
+            ),
+          const SizedBox(height: 10),
+        ],
+      ],
     );
   }
 }
