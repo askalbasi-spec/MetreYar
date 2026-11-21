@@ -270,6 +270,9 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           result = 'بار گرمایشی: ${watts.toStringAsFixed(0)} وات\nپره رادیاتور: ${(watts / v('fin')).ceil()} عدد';
           break;
         case 49:
+          result = 'آب سرد و گرم: ${(v('area') * v('waterRate')).toStringAsFixed(1)} متر\nفاضلاب، باران و هواکش: ${(v('area') * v('drainRate')).toStringAsFixed(1)} متر';
+          break;
+        case 50:
           result = 'طول سیم: ${(v('area') * v('rate')).toStringAsFixed(1)} متر\nکلید و پریز: ${v('points').ceil()} عدد';
           break;
         case 20:
