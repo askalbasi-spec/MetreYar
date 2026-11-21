@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'workspace.dart';
 
 const _gold = Color(0xFFD6AD55);
 const _silver = Color(0xFFD9DEE7);
@@ -397,6 +398,13 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
           throw const FormatException('برای این مورد محاسبه عددی تعریف نشده است.');
       }
       setState(() { _result = result; _error = null; });
+      final entered = widget.spec.inputs.map((field) => '${field.label}: ${_controllers[field.key]?.text ?? ''} ${field.unit}').join('، ');
+      WorkspaceStore.addHistory(
+        title: widget.spec.title,
+        formula: widget.spec.formula ?? 'راهنمای مهندسی',
+        result: result,
+        inputs: entered,
+      );
     } on Object catch (e) {
       setState(() { _result = null; _error = e is FormatException ? e.message.toString() : 'ورودی‌ها معتبر نیستند.'; });
     }
