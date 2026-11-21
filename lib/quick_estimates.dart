@@ -94,10 +94,15 @@ const _estimates = <_EstimateSpec>[
 
 String _categoryForEstimate(int id) {
   if (<int>{13, 21, 23, 24, 31, 32, 33, 51}.contains(id)) return 'بتن‌ریزی';
-  if (<int>{1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 22, 25, 29, 30, 34, 35, 36, 37, 52}.contains(id)) return 'سفت‌کاری';
-  if (<int>{9, 10, 18, 19, 20, 26, 27, 40, 41, 42, 43, 44, 45, 46, 47, 53}.contains(id)) return 'نازک‌کاری';
+  if (<int>{1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 22, 25, 29, 30, 34, 35, 36, 37, 52, 53}.contains(id)) return 'سفت‌کاری';
+  if (<int>{9, 10, 18, 19, 20, 26, 27, 40, 41, 42, 43, 44, 45, 46, 47}.contains(id)) return 'نازک‌کاری';
   if (<int>{28, 38, 39, 48, 49}.contains(id)) return 'تأسیسات مکانیکی';
   return 'تأسیسات برقی';
+}
+
+Widget quickEstimatePage(int id) {
+  final spec = _estimates.firstWhere((item) => item.id == id);
+  return _EstimateDetailPage(spec: spec);
 }
 
 class QuickEstimatesPage extends StatelessWidget {
@@ -109,7 +114,7 @@ class QuickEstimatesPage extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('۵۰ ابزار متره و برآورد'),
+          title: const Text('۵۳ ابزار متره و برآورد'),
           bottom: const TabBar(
             isScrollable: true,
             tabs: [
