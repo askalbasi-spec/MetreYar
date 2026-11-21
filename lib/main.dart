@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/calculations.dart';
 import 'quick_estimates.dart';
+import 'workspace.dart';
 
 const _gold = Color(0xFFD6AD55);
 const _silver = Color(0xFFD9DEE7);
@@ -220,6 +221,12 @@ class HomePage extends StatelessWidget {
               ]),
             ),
             const SizedBox(height: 13),
+            OutlinedButton.icon(
+              onPressed: () => _openCalculator(context, const WorkspacePage()),
+              icon: const Icon(Icons.workspaces_outline),
+              label: const Text('پروژه‌ها، سوابق، تبدیل واحد و برآورد هزینه'),
+            ),
+            const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () => _openCalculator(context, const QuickEstimatesPage()),
               icon: const Icon(Icons.grid_view_rounded),
