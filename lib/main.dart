@@ -105,65 +105,206 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fullName = '${profile['firstName'] ?? ''} ${profile['lastName'] ?? ''}'.trim();
+    final fullName = '\${profile['firstName'] ?? ''} \${profile['lastName'] ?? ''}'.trim();
     final avatar = _avatarFor(profile['avatar'] ?? 'engineering');
     return Scaffold(
       appBar: AppBar(
-        title: const Column(children: [Text('متره‌وبرآوردیار', style: TextStyle(fontWeight: FontWeight.bold)), Text('ENGINE PLUS', style: TextStyle(fontSize: 10, letterSpacing: 2))]),
-        actions: [IconButton(tooltip: 'تنظیمات و پروفایل', onPressed: onOpenSettings, icon: const Icon(Icons.settings_outlined))],
+        toolbarHeight: 72,
+        title: const Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('متره و برآوردیار', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+          SizedBox(height: 3),
+          Text('ENGINE PLUS  |  دفتر فنی هوشمند', style: TextStyle(fontSize: 11, letterSpacing: .5, color: _gold)),
+        ]),
+        actions: [IconButton(tooltip: 'تنظیمات', onPressed: onOpenSettings, icon: const Icon(Icons.settings_outlined))],
       ),
-      body: SafeArea(child: ListView(padding: const EdgeInsets.all(18), children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(22),
-          onTap: onOpenSettings,
-          child: Card(child: Padding(padding: const EdgeInsets.all(14), child: Row(children: [
-            CircleAvatar(radius: 27, backgroundColor: palette.primary.withValues(alpha: .18), child: Text(avatar, style: const TextStyle(fontSize: 25))),
-            const SizedBox(width: 12),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(fullName.isEmpty ? 'مهندس گرامی، خوش آمدید' : 'سلام، $fullName', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
-              Text(fullName.isEmpty ? 'برای تکمیل پروفایل لمس کنید' : (profile['field']?.isNotEmpty == true ? profile['field']! : 'دفتر فنی هوشمند اینجین پلاس'),
-                style: TextStyle(color: palette.secondary, fontSize: 12)),
-            ])),
-            Icon(Icons.edit_outlined, color: palette.primary),
-          ]))),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [palette.surface, palette.background], begin: Alignment.topRight, end: Alignment.bottomLeft),
-            borderRadius: BorderRadius.circular(24), border: Border.all(color: palette.primary.withValues(alpha: .75)),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .25), blurRadius: 22, offset: const Offset(0, 10))],
-          ),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [Icon(Icons.architecture_rounded, color: palette.primary, size: 22), const SizedBox(width: 8),
-              Text('ENGINE PLUS  |  دفتر فنی هوشمند', style: TextStyle(color: palette.primary, fontSize: 11, fontWeight: FontWeight.w700))]),
-            const SizedBox(height: 16),
-            const Text('متره و برآورد، دقیق‌تر و سریع‌تر', style: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, height: 1.5)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 22),
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: onOpenSettings,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                decoration: BoxDecoration(
+                  color: palette.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: palette.accent.withValues(alpha: .8)),
+                ),
+                child: Row(children: [
+                  CircleAvatar(
+                    radius: 23,
+                    backgroundColor: palette.primary.withValues(alpha: .2),
+                    child: Text(avatar, style: const TextStyle(fontSize: 23)),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(fullName.isEmpty ? 'مهندس گرامی، خوش آمدید' : fullName,
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
+                    Text(fullName.isEmpty ? 'برای ثبت مشخصات، اینجا را لمس کنید' : (profile['field']?.isNotEmpty == true ? profile['field']! : 'پروفایل کاربری'),
+                      style: TextStyle(color: palette.secondary, fontSize: 11)),
+                  ])),
+                  Icon(Icons.edit_outlined, color: palette.primary, size: 19),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 13),
+            _metalPanel(
+              palette: palette,
+              child: Column(children: [
+                Text('متره و برآورد، دقیق‌تر و سریع‌تر',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: palette.primary, fontSize: 19, fontWeight: FontWeight.w900, height: 1.5)),
+                const SizedBox(height: 7),
+                Text('ابزارهای کاربردی پروژه‌های ساختمانی',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: palette.onSurface, fontSize: 14, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text('محاسبات کارگاهی',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: palette.secondary, fontSize: 13)),
+              ]),
+            ),
+            const SizedBox(height: 17),
+            _sectionPanel(
+              palette: palette,
+              title: 'دسترسی سریع',
+              child: Column(children: [
+                Row(children: [
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.format_paint_outlined, title: 'نازک‌کاری',
+                    onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 1)))),
+                  const SizedBox(width: 9),
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.foundation_outlined, title: 'بتن و سفت‌کاری',
+                    onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0)))),
+                ]),
+                const SizedBox(height: 9),
+                SizedBox(width: double.infinity, child: _quickAccessButton(
+                  palette: palette, icon: Icons.plumbing_outlined, title: 'تأسیسات ( مکانیکی – برقی )',
+                  onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 2)))),
+              ]),
+            ),
+            const SizedBox(height: 15),
+            _sectionPanel(
+              palette: palette,
+              title: 'آخرین محاسبات',
+              child: Column(children: [
+                _recentCalculation(palette, 'محاسبه حجم بتن سقف', 'مثال فرضی', Icons.layers_outlined,
+                  () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0))),
+                const SizedBox(height: 8),
+                _recentCalculation(palette, 'برآورد میلگرد فونداسیون', 'مثال فرضی', Icons.construction_outlined,
+                  () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0))),
+                const SizedBox(height: 8),
+                _recentCalculation(palette, 'متره گچ‌کاری', 'مثال فرضی', Icons.square_foot_outlined,
+                  () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 1))),
+              ]),
+            ),
+            const SizedBox(height: 15),
+            Container(
+              padding: const EdgeInsets.fromLTRB(15, 13, 15, 15),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFB477),
+                borderRadius: BorderRadius.circular(17),
+                border: Border.all(color: const Color(0xFFFFD18D), width: 2),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .2), blurRadius: 10, offset: const Offset(0, 4))],
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+                Text('نکته اجرایی امروز', style: TextStyle(color: Color(0xFF172033), fontSize: 17, fontWeight: FontWeight.w900)),
+                SizedBox(height: 8),
+                Text('رعایت پوشش بتن (کاور) در فونداسیون برای جلوگیری از زنگ‌زدگی میلگردها الزامی است.',
+                  style: TextStyle(color: Color(0xFF172033), height: 1.7, fontSize: 13, fontWeight: FontWeight.w700)),
+                SizedBox(height: 5),
+                Text('نکته: قبل از بتن‌ریزی، مربوط کردن قالب‌ها فراموش نشود.',
+                  style: TextStyle(color: Color(0xFF172033), height: 1.7, fontSize: 13, fontWeight: FontWeight.w700)),
+              ]),
+            ),
+            const SizedBox(height: 13),
+            OutlinedButton.icon(
+              onPressed: () => _openCalculator(context, const QuickEstimatesPage()),
+              icon: const Icon(Icons.grid_view_rounded),
+              label: const Text('فهرست کامل ۵۳ ابزار'),
+            ),
             const SizedBox(height: 8),
-            Text('ابزارهای کاربردی پروژه‌های ساختمانی و محاسبات کارگاهی', style: TextStyle(color: palette.secondary, height: 1.7, fontSize: 13)),
-          ]),
+            Center(child: Text('ENGINE PLUS', style: TextStyle(color: palette.secondary, fontSize: 10, letterSpacing: 2))),
+          ],
         ),
-        const SizedBox(height: 26),
-        const Row(children: [Text('دسترسی سریع', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)), SizedBox(width: 8), Expanded(child: Divider())]),
-        const SizedBox(height: 13),
-        _ToolCard(icon: Icons.foundation_rounded, title: 'بتن و سفت‌کاری', subtitle: 'بتن‌ریزی، آرماتور و عملیات بنایی',
-          onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0))),
-        _ToolCard(icon: Icons.format_paint_rounded, title: 'نازک‌کاری', subtitle: 'کف‌سازی، اندود، رنگ و پوشش‌ها',
-          onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 1))),
-        _ToolCard(icon: Icons.electrical_services_rounded, title: 'تأسیسات', subtitle: 'محاسبات تأسیسات مکانیکی و برقی',
-          onTap: () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 2))),
-        const SizedBox(height: 14),
-        Card(child: ListTile(contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: CircleAvatar(backgroundColor: palette.primary.withValues(alpha: .15), child: Icon(Icons.grid_view_rounded, color: palette.primary)),
-          title: const Text('فهرست کامل ۵۳ ابزار', style: TextStyle(fontWeight: FontWeight.w800)),
-          subtitle: const Text('مشاهده همه محاسبات و راهنماهای مهندسی'),
-          trailing: const Icon(Icons.chevron_left_rounded), onTap: () => _openCalculator(context, const QuickEstimatesPage()))),
-        const SizedBox(height: 18),
-        Center(child: Text('نسخه 1.2.5  •  اینجین پلاس', style: TextStyle(color: palette.secondary, fontSize: 12))),
-      ])),
+      ),
     );
   }
+
+  Widget _metalPanel({required AppPalette palette, required Widget child}) => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(colors: [palette.surface, palette.background, palette.surface], begin: Alignment.topLeft, end: Alignment.bottomRight),
+      borderRadius: BorderRadius.circular(21),
+      border: Border.all(color: palette.primary.withValues(alpha: .9), width: 1.6),
+      boxShadow: [BoxShadow(color: palette.primary.withValues(alpha: .14), blurRadius: 17, spreadRadius: 1)],
+    ),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: palette.secondary.withValues(alpha: .55)),
+      ),
+      child: child,
+    ),
+  );
+
+  Widget _sectionPanel({required AppPalette palette, required String title, required Widget child}) => Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: palette.surface,
+      borderRadius: BorderRadius.circular(17),
+      border: Border.all(color: palette.accent.withValues(alpha: .9), width: 1),
+      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .18), blurRadius: 9, offset: const Offset(0, 3))],
+    ),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Padding(padding: const EdgeInsets.only(bottom: 10, right: 3),
+        child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900))),
+      child,
+    ]),
+  );
+
+  Widget _quickAccessButton({required AppPalette palette, required IconData icon, required String title, required VoidCallback onTap}) =>
+    Material(
+      color: palette.background.withValues(alpha: .65),
+      borderRadius: BorderRadius.circular(13),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(13),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 58),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(13), border: Border.all(color: palette.secondary.withValues(alpha: .65))),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Flexible(child: Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12))),
+            const SizedBox(width: 7),
+            Icon(icon, color: palette.primary, size: 23),
+          ]),
+        ),
+      ),
+    );
+
+  Widget _recentCalculation(AppPalette palette, String title, String tag, IconData icon, VoidCallback onTap) =>
+    Material(
+      color: palette.background.withValues(alpha: .82),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 12),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: palette.accent.withValues(alpha: .7))),
+          child: Row(children: [
+            Icon(icon, color: palette.primary, size: 22),
+            const SizedBox(width: 8),
+            Expanded(child: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800))),
+            Text(tag, style: TextStyle(color: palette.primary, fontSize: 11, fontWeight: FontWeight.w800)),
+          ]),
+        ),
+      ),
+    );
 
   void _openCalculator(BuildContext context, Widget page) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
 }
