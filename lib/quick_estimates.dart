@@ -113,7 +113,7 @@ class QuickEstimatesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      initialIndex: initialTabIndex.clamp(0, 2),
+      initialIndex: initialTabIndex.clamp(0, 2).toInt(),
       length: 3,
       child: Scaffold(
         appBar: AppBar(
