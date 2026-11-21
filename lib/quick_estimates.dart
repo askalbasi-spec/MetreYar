@@ -87,12 +87,15 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id:48,title:'ظرفیت گرمایشی و پره رادیاتور',description:'تخمین بار گرمایشی و تعداد پره.',formula:'توان=مساحت×وات بر مترمربع؛ پره=توان÷توان هر پره',inputs:[_InputSpec('area','مساحت مفید','مترمربع'),_InputSpec('rate','بار گرمایشی','وات بر مترمربع',initial:'155'),_InputSpec('fin','توان هر پره','وات',initial:'150')],resultUnit:'وات و تعداد پره'),
   _EstimateSpec(id:49,title:'لوله‌کشی آب و فاضلاب',description:'تخمین طول لوله آب سرد و گرم و لوله فاضلاب، باران و هواکش.',formula:'زیربنا × سرانه هر گروه لوله',inputs:[_InputSpec('area','زیربنای کل','مترمربع'),_InputSpec('waterRate','سرانه آب سرد و گرم','متر بر مترمربع',initial:'0.55'),_InputSpec('drainRate','سرانه فاضلاب و هواکش','متر بر مترمربع',initial:'0.65')],resultUnit:'متر لوله',warning:'این سرانه‌ها فقط برای تخمین اولیه‌اند؛ تعداد سرویس‌ها، رایزرها و نقشه تأسیسات ملاک متره است.'),
   _EstimateSpec(id:50,title:'سیم‌کشی و تجهیزات برق',description:'تخمین طول سیم و تعداد کلید و پریز و تابلو.',formula:'زیربنا × سرانه سیم',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه سیم','متر بر مترمربع',initial:'5'),_InputSpec('points','تعداد کلید و پریز','عدد',initial:'30')],resultUnit:'متر سیم و عدد تجهیزات',warning:'طول واقعی به تعداد مدارها، رشته‌ها، مسیرها و نقشه برق وابسته است.'),
+  _EstimateSpec(id:51,title:'حجم بتن مستطیلی',description:'محاسبه حجم بتن عضو مستطیلی از طول، عرض و ارتفاع.',formula:'طول × عرض × ارتفاع',inputs:[_InputSpec('length','طول','متر'),_InputSpec('width','عرض','متر'),_InputSpec('height','ارتفاع','متر')],resultUnit:'مترمکعب بتن'),
+  _EstimateSpec(id:52,title:'وزن میلگرد',description:'محاسبه وزن تقریبی میلگرد از قطر و طول.',formula:'قطر² ÷ ۱۶۲ × طول',inputs:[_InputSpec('diameter','قطر میلگرد','میلی‌متر'),_InputSpec('length','طول کل','متر')],resultUnit:'کیلوگرم'),
+  _EstimateSpec(id:53,title:'مساحت مستطیل',description:'محاسبه مساحت سطح مستطیلی.',formula:'طول × عرض',inputs:[_InputSpec('length','طول','متر'),_InputSpec('width','عرض','متر')],resultUnit:'مترمربع'),
 ]; 
 
 String _categoryForEstimate(int id) {
-  if (<int>{13, 21, 23, 24, 31, 32, 33}.contains(id)) return 'بتن‌ریزی';
-  if (<int>{1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 22, 25, 29, 30, 34, 35, 36, 37}.contains(id)) return 'سفت‌کاری';
-  if (<int>{9, 10, 18, 19, 20, 26, 27, 40, 41, 42, 43, 44, 45, 46, 47}.contains(id)) return 'نازک‌کاری';
+  if (<int>{13, 21, 23, 24, 31, 32, 33, 51}.contains(id)) return 'بتن‌ریزی';
+  if (<int>{1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 14, 15, 16, 17, 22, 25, 29, 30, 34, 35, 36, 37, 52}.contains(id)) return 'سفت‌کاری';
+  if (<int>{9, 10, 18, 19, 20, 26, 27, 40, 41, 42, 43, 44, 45, 46, 47, 53}.contains(id)) return 'نازک‌کاری';
   if (<int>{28, 38, 39, 48, 49}.contains(id)) return 'تأسیسات مکانیکی';
   return 'تأسیسات برقی';
 }
@@ -250,6 +253,15 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
       final v = _value;
       String result;
       switch (widget.spec.id) {
+        case 51:
+          result = '${(v('length') * v('width') * v('height')).toStringAsFixed(3)} مترمکعب بتن';
+          break;
+        case 52:
+          result = '${(v('diameter') * v('diameter') / 162 * v('length')).toStringAsFixed(2)} کیلوگرم میلگرد';
+          break;
+        case 53:
+          result = '${(v('length') * v('width')).toStringAsFixed(2)} مترمربع';
+          break;
         case 1:
           result = '${(v('diameter') * v('diameter') / 162 * v('length')).toStringAsFixed(2)} کیلوگرم';
         case 2:
