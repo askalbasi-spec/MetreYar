@@ -105,7 +105,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fullName = '\${profile['firstName'] ?? ''} \${profile['lastName'] ?? ''}'.trim();
+    final fullName = '${profile['firstName'] ?? ''} ${profile['lastName'] ?? ''}'.trim();
     final avatar = _avatarFor(profile['avatar'] ?? 'engineering');
     return Scaffold(
       appBar: AppBar(
@@ -406,20 +406,6 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _saving = false);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('مشخصات کاربری ذخیره شد.')));
     Navigator.of(context).pop();
-  }
-}
-
-class _ToolCard extends StatelessWidget {
-  const _ToolCard({required this.icon, required this.title, required this.subtitle, required this.onTap});
-  final IconData icon; final String title; final String subtitle; final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primary;
-    return Card(margin: const EdgeInsets.only(bottom: 10), child: ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-      leading: CircleAvatar(backgroundColor: color.withValues(alpha: .14), child: Icon(icon, color: color)),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-      subtitle: Text(subtitle), trailing: const Icon(Icons.arrow_back_ios_new_rounded, size: 16), onTap: onTap));
   }
 }
 
