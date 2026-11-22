@@ -22,9 +22,10 @@ class WorkspaceStore {
   static Future<void> clearHistory() async {final p=await SharedPreferences.getInstance();await p.remove(_hk);}
 }
 
-class WorkspacePage extends StatefulWidget {const WorkspacePage({super.key});@override State<WorkspacePage> createState()=>_WorkspacePageState();}
+class WorkspacePage extends StatefulWidget {const WorkspacePage({super.key,this.initialTab=0});final int initialTab;@override State<WorkspacePage> createState()=>_WorkspacePageState();}
 class _WorkspacePageState extends State<WorkspacePage>{
- int tab=0;
+ late int tab;
+ @override void initState(){super.initState();tab=widget.initialTab.clamp(0,4);}
  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('فضای کار مهندسی')),body:IndexedStack(index:tab,children:const [_ProjectsTab(),_HistoryTab(),_ConverterTab(),_FormulaTab(),_CostTab()]),bottomNavigationBar:NavigationBar(selectedIndex:tab,onDestinationSelected:(v)=>setState(()=>tab=v),destinations:const [NavigationDestination(icon:Icon(Icons.apartment),label:'پروژه‌ها'),NavigationDestination(icon:Icon(Icons.history),label:'سوابق'),NavigationDestination(icon:Icon(Icons.swap_horiz),label:'تبدیل واحد'),NavigationDestination(icon:Icon(Icons.functions),label:'فرمول‌ها'),NavigationDestination(icon:Icon(Icons.payments),label:'هزینه')]));
 }
 
