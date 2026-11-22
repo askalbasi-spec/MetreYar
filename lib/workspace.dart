@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,8 +48,8 @@ class _HistoryTabState extends State<_HistoryTab>{late Future<List<Map<String,dy
 
 class _ConverterTab extends StatefulWidget {const _ConverterTab();@override State<_ConverterTab> createState()=>_ConverterTabState();}
 class _ConverterTabState extends State<_ConverterTab>{
- final input=TextEditingController(text:'1');String kind='طول',result='';static const labels={'طول':'متر به سانتی‌متر','مساحت':'مترمربع به سانتی‌مترمربع','حجم':'مترمکعب به لیتر','وزن':'کیلوگرم به تن','قطر':'میلی‌متر به متر','اینچ':'اینچ به میلی‌متر'};
- void calc(){final v=double.tryParse(input.text.replaceAll('٫','.').replaceAll(',','.'));if(v==null||!v.isFinite||v<0){setState(()=>result='عدد معتبر و غیرمنفی وارد کنید.');return;}final factors={'طول':100.0,'مساحت':10000.0,'حجم':1000.0,'وزن':.001,'قطر':.001,'اینچ':25.4};setState(()=>result=labels[kind].toString()+': '+(v*factors[kind]!).toStringAsFixed(4));}
+ final input=TextEditingController(text:'1');String kind='طول',result='';static const labels={'طول':'متر به سانتی‌متر','مساحت':'مترمربع به سانتی‌مترمربع','حجم':'مترمکعب به لیتر','وزن':'کیلوگرم به تن','قطر':'میلی‌متر به متر','اینچ':'اینچ به میلی‌متر','شیب':'درجه به درصد شیب'};
+ void calc(){var raw=input.text;const fa='۰۱۲۳۴۵۶۷۸۹',ar='٠١٢٣٤٥٦٧٨٩';for(var i=0;i<10;i++){raw=raw.replaceAll(fa[i],'$i').replaceAll(ar[i],'$i');}final v=double.tryParse(raw.replaceAll('٫','.').replaceAll(',','.').replaceAll('٬',''));if(v==null||!v.isFinite||v<0){setState(()=>result='عدد معتبر و غیرمنفی وارد کنید.');return;}if(kind=='شیب'){if(v>=90){setState(()=>result='زاویه باید کمتر از ۹۰ درجه باشد.');return;}final percent=math.tan(v*math.pi/180)*100;setState(()=>result='درصد شیب: '+percent.toStringAsFixed(3)+'٪');return;}final factors={'طول':100.0,'مساحت':10000.0,'حجم':1000.0,'وزن':.001,'قطر':.001,'اینچ':25.4};setState(()=>result=labels[kind].toString()+': '+(v*factors[kind]!).toStringAsFixed(4));}
  @override void dispose(){input.dispose();super.dispose();}
  @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(16),children:[const Text('تبدیل واحدهای مهندسی',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold)),DropdownButtonFormField<String>(value:kind,items:labels.entries.map((e)=>DropdownMenuItem(value:e.key,child:Text(e.value))).toList(),onChanged:(v){if(v!=null)setState(()=>kind=v);}),const SizedBox(height:12),TextField(controller:input,keyboardType:const TextInputType.numberWithOptions(decimal:true),decoration:const InputDecoration(labelText:'مقدار')),FilledButton(onPressed:calc,child:const Text('تبدیل')),Card(child:Padding(padding:const EdgeInsets.all(16),child:Text(result)))]);
 }
