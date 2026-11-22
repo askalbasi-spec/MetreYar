@@ -6,6 +6,7 @@ import 'workspace.dart';
 
 const _gold = Color(0xFFD6AD55);
 const _silver = Color(0xFFD9DEE7);
+final RouteObserver<PageRoute<dynamic>> _homeRouteObserver = RouteObserver<PageRoute<dynamic>>();
 
 class AppPalette {
   const AppPalette(this.name, this.subtitle, this.background, this.surface, this.primary, this.secondary, this.accent, this.onSurface);
@@ -76,6 +77,7 @@ class _MetreYarAppState extends State<MetreYarApp> {
     );
     return MaterialApp(
       title: 'متره‌وبرآوردیار', debugShowCheckedModeBanner: false,
+      navigatorObservers: [_homeRouteObserver],
       theme: ThemeData(
         useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: palette.background,
         visualDensity: VisualDensity.standard,
@@ -319,9 +321,13 @@ class _RecentCalculations extends StatefulWidget {
   @override State<_RecentCalculations> createState() => _RecentCalculationsState();
 }
 
-class _RecentCalculationsState extends State<_RecentCalculations> {
+class _RecentCalculationsState extends State<_RecentCalculations> with RouteAware {
   late Future<List<Map<String, dynamic>>> _history;
+  PageRoute<dynamic>? _subscribedRoute;
   @override void initState() { super.initState(); _reload(); }
+  @override void didChangeDependencies() { super.didChangeDependencies(); final route = ModalRoute.of(context); if (route is PageRoute<dynamic> && route != _subscribedRoute) { if (_subscribedRoute != null) _homeRouteObserver.unsubscribe(this); _subscribedRoute = route; _homeRouteObserver.subscribe(this, route); } }
+  @override void didPopNext() { if (mounted) setState(_reload); }
+  @override void dispose() { _homeRouteObserver.unsubscribe(this); super.dispose(); }
   void _reload() { _history = WorkspaceStore.history(); }
   @override Widget build(BuildContext context) => FutureBuilder<List<Map<String, dynamic>>>(
     future: _history,
