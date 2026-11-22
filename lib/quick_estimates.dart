@@ -178,7 +178,7 @@ class _EstimateTabGroup extends StatelessWidget {
                   item.inputs.isEmpty ? 'راهنمای مهندسی — بدون محاسبه عددی' : item.description,
                   style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
-                trailing: const Icon(Icons.arrow_back_ios_new_rounded, color: Theme.of(context).colorScheme.primary, size: 15),
+                trailing: Icon(Icons.arrow_back_ios_new_rounded, color: Theme.of(context).colorScheme.primary, size: 15),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
                   builder: (_) => _EstimateDetailPage(spec: item),
                 )),
