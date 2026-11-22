@@ -91,6 +91,7 @@ class _MetreYarAppState extends State<MetreYarApp> {
       ),
       home: Directionality(textDirection: TextDirection.rtl, child: _loaded
         ? HomePage(profile: _profile, palette: palette,
+            onOpenProfile: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfilePage(initialProfile: _profile, onSaved: _saveProfile))),
             onOpenSettings: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SettingsPage(
               selectedTheme: _themeKey, profile: _profile, onThemeChanged: _saveTheme, onProfileSaved: _saveProfile))))
         : const Scaffold(body: Center(child: CircularProgressIndicator()))),
@@ -99,10 +100,11 @@ class _MetreYarAppState extends State<MetreYarApp> {
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key, required this.profile, required this.palette, required this.onOpenSettings});
+  const HomePage({super.key, required this.profile, required this.palette, required this.onOpenSettings, required this.onOpenProfile});
   final Map<String, String> profile;
   final AppPalette palette;
   final VoidCallback onOpenSettings;
+  final VoidCallback onOpenProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +126,7 @@ class HomePage extends StatelessWidget {
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(16),
-              onTap: onOpenSettings,
+              onTap: onOpenProfile,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                 decoration: BoxDecoration(
@@ -190,16 +192,10 @@ class HomePage extends StatelessWidget {
             _sectionPanel(
               palette: palette,
               title: 'آخرین محاسبات',
-              child: Column(children: [
-                _recentCalculation(palette, 'محاسبه حجم بتن سقف', 'مثال فرضی', Icons.layers_outlined,
-                  () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0))),
-                const SizedBox(height: 8),
-                _recentCalculation(palette, 'برآورد میلگرد فونداسیون', 'مثال فرضی', Icons.construction_outlined,
-                  () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 0))),
-                const SizedBox(height: 8),
-                _recentCalculation(palette, 'متره گچ‌کاری', 'مثال فرضی', Icons.square_foot_outlined,
-                  () => _openCalculator(context, const QuickEstimatesPage(initialTabIndex: 1))),
-              ]),
+              child: _RecentCalculations(
+                palette: palette,
+                onOpenHistory: () => _openCalculator(context, const WorkspacePage(initialTab: 1)),
+              ),
             ),
             const SizedBox(height: 15),
             Container(
@@ -314,6 +310,45 @@ class HomePage extends StatelessWidget {
     );
 
   void _openCalculator(BuildContext context, Widget page) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+}
+
+class _RecentCalculations extends StatefulWidget {
+  const _RecentCalculations({required this.palette, required this.onOpenHistory});
+  final AppPalette palette;
+  final VoidCallback onOpenHistory;
+  @override State<_RecentCalculations> createState() => _RecentCalculationsState();
+}
+
+class _RecentCalculationsState extends State<_RecentCalculations> {
+  late Future<List<Map<String, dynamic>>> _history;
+  @override void initState() { super.initState(); _reload(); }
+  void _reload() { _history = WorkspaceStore.history(); }
+  @override Widget build(BuildContext context) => FutureBuilder<List<Map<String, dynamic>>>(
+    future: _history,
+    builder: (context, snapshot) {
+      final items = snapshot.data ?? const <Map<String, dynamic>>[];
+      if (snapshot.connectionState != ConnectionState.done) return const Padding(padding: EdgeInsets.all(12), child: Center(child: CircularProgressIndicator()));
+      if (items.isEmpty) return Text('هنوز محاسبه‌ای ثبت نشده است. پس از انجام محاسبه، سه مورد آخر اینجا نمایش داده می‌شود.', style: TextStyle(color: widget.palette.secondary, height: 1.7));
+      return Column(children: [
+        for (var i = 0; i < items.take(3).length; i++) ...[
+          if (i > 0) const SizedBox(height: 8),
+          Material(color: widget.palette.background.withValues(alpha: .82), borderRadius: BorderRadius.circular(12), child: InkWell(
+            onTap: widget.onOpenHistory, borderRadius: BorderRadius.circular(12),
+            child: Container(padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 12), decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: widget.palette.accent.withValues(alpha: .7))),
+              child: Row(children: [
+                Icon(Icons.calculate_outlined, color: widget.palette.primary, size: 22), const SizedBox(width: 8),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(items[i]['title']?.toString() ?? 'محاسبه', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 3), Text(items[i]['result']?.toString() ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: widget.palette.secondary, fontSize: 10)),
+                ])),
+                if ((items[i]['projectName']?.toString() ?? '').isNotEmpty) Text(items[i]['projectName'].toString(), style: TextStyle(color: widget.palette.primary, fontSize: 10)),
+              ])),
+          )),
+        ],
+        Align(alignment: Alignment.centerLeft, child: TextButton.icon(onPressed: widget.onOpenHistory, icon: const Icon(Icons.history), label: const Text('مشاهده همه سوابق'))),
+      ]);
+    },
+  );
 }
 
 class SettingsPage extends StatelessWidget {
