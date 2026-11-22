@@ -399,11 +399,14 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
       }
       setState(() { _result = result; _error = null; });
       final entered = widget.spec.inputs.map((field) => '${field.label}: ${_controllers[field.key]?.text ?? ''} ${field.unit}').join('، ');
-      WorkspaceStore.addHistory(
+      final activeProject = await WorkspaceStore.activeProject();
+      await WorkspaceStore.addHistory(
         title: widget.spec.title,
         formula: widget.spec.formula ?? 'راهنمای مهندسی',
         result: result,
         inputs: entered,
+        projectId: activeProject?.id,
+        projectName: activeProject?.name,
       );
     } on Object catch (e) {
       setState(() { _result = null; _error = e is FormatException ? e.message.toString() : 'ورودی‌ها معتبر نیستند.'; });
