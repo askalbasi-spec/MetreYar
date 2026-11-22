@@ -310,11 +310,12 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
         case 10:
           result = '${(v('area') * v('thickness') / 100).toStringAsFixed(3)} مترمکعب';
         case 13:
-          result = '${(v('length') * v('width') * v('height')).toStringAsFixed(3)} مترمکعب';
-          result += '\nبرای استوانه: ${(math.pi * math.pow(v('width') / 2, 2) * v('height')).toStringAsFixed(3)} مترمکعب (قطر = عرض)';
+          final prism = v('length') * v('width') * v('height');
+          final cylinder = math.pi * math.pow(v('width') / 2, 2) * v('height');
+          result = 'حجم منشور مستطیلی: ${prism.toStringAsFixed(3)} مترمکعب\nحجم استوانه با فرض قطر برابر عرض ورودی: ${cylinder.toStringAsFixed(3)} مترمکعب';
 
         case 21:
-          result = 'فرغون: ${(v('volume') * 1000 / v('wheel')).ceil()} بار\nمیکسر: ${(v('volume') * 1000 / v('mixer')).toStringAsFixed(2)} بار';
+          result = 'فرغون: ${(v('volume') * 1000 / v('wheel')).ceil()} بار\nمیکسر: ${(v('volume') * 1000 / v('mixer')).ceil()} نوبت کامل';
           break;
         case 22:
           final bank = v('length') * v('width') * v('depth');
@@ -331,7 +332,11 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
         case 38:
         case 39:
           final amount = v('area') * v('rate');
-          result = '${amount.toStringAsFixed(2)} ${widget.spec.resultUnit}';
+          if (widget.spec.id == 30) {
+            result = '${amount.ceil()} عدد بلوک سقفی';
+          } else {
+            result = '${amount.toStringAsFixed(2)} ${widget.spec.resultUnit}';
+          }
           break;
         case 40:
           final dryMaterialKg = v('volume') * v('rate');
