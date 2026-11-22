@@ -3,8 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'workspace.dart';
 
-const _gold = Color(0xFFD6AD55);
-const _silver = Color(0xFFD9DEE7);
 
 class _InputSpec {
   const _InputSpec(this.key, this.label, this.unit, {this.initial = ''});
@@ -119,13 +117,12 @@ class QuickEstimatesPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('ابزارهای متره و برآورد'),
-          backgroundColor: const Color(0xFF101B2D),
-          bottom: const TabBar(
+          bottom: TabBar(
             isScrollable: true,
-            indicatorColor: _gold,
+            indicatorColor: Theme.of(context).colorScheme.primary,
             indicatorWeight: 3,
-            labelColor: _gold,
-            unselectedLabelColor: _silver,
+            labelColor: Theme.of(context).colorScheme.primary,
+            unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
             labelStyle: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
             unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             tabs: [
@@ -161,9 +158,9 @@ class _EstimateTabGroup extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(13),
               child: Row(children: [
-                Container(width: 4, height: 22, decoration: BoxDecoration(color: _gold, borderRadius: BorderRadius.circular(4))),
+                Container(width: 4, height: 22, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary, borderRadius: BorderRadius.circular(4))),
                 const SizedBox(width: 10),
-                Text(category, style: const TextStyle(color: _gold, fontWeight: FontWeight.w800, fontSize: 15)),
+                Text(category, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w800, fontSize: 15)),
               ]),
             ),
           ),
@@ -173,15 +170,15 @@ class _EstimateTabGroup extends StatelessWidget {
               child: ListTile(
                 leading: CircleAvatar(
                   radius: 21,
-                  backgroundColor: _gold.withValues(alpha: .15),
-                  child: Text('${item.id}', style: const TextStyle(color: _gold, fontWeight: FontWeight.bold)),
+                  backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .15),
+                  child: Text('${item.id}', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
                 ),
                 title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
                 subtitle: Text(
                   item.inputs.isEmpty ? 'راهنمای مهندسی — بدون محاسبه عددی' : item.description,
-                  style: const TextStyle(color: _silver),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
-                trailing: const Icon(Icons.arrow_back_ios_new_rounded, color: _gold, size: 15),
+                trailing: const Icon(Icons.arrow_back_ios_new_rounded, color: Theme.of(context).colorScheme.primary, size: 15),
                 onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
                   builder: (_) => _EstimateDetailPage(spec: item),
                 )),
@@ -426,10 +423,10 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text(spec.description, style: const TextStyle(color: _silver, height: 1.7)),
+          Text(spec.description, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.7)),
           if (spec.formula != null) ...[
             const SizedBox(height: 12),
-            Text('فرمول: ${spec.formula}', style: const TextStyle(color: _gold, height: 1.8)),
+            Text('فرمول: ${spec.formula}', style: TextStyle(color: Theme.of(context).colorScheme.primary, height: 1.8)),
           ],
           if (spec.inputs.isNotEmpty) ...[
             const SizedBox(height: 18),
@@ -462,7 +459,7 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
             const SizedBox(height: 18),
             const Card(child: Padding(
               padding: EdgeInsets.all(16),
-              child: Text('راهنمای کنترل اولیه', style: TextStyle(color: _gold, fontWeight: FontWeight.bold)),
+              child: Text('راهنمای کنترل اولیه', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
             )),
             const SizedBox(height: 8),
             Text(spec.guide ?? '', style: const TextStyle(height: 1.9)),
@@ -474,7 +471,7 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
               child: Padding(
                 padding: const EdgeInsets.all(14),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(Icons.info_outline, color: _gold),
+                  Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 10),
                   Expanded(child: Text(spec.warning!, style: const TextStyle(height: 1.7))),
                 ]),
@@ -482,7 +479,7 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
             ),
           ],
           const SizedBox(height: 18),
-          const Text('این ابزار برای برآورد اولیه و کنترل کارگاهی است و جایگزین نقشه‌ها، مشخصات فنی، گزارش ژئوتکنیک یا محاسبات مهندسی و ضوابط لازم‌الاجرا نیست.', style: TextStyle(color: _silver, fontSize: 12, height: 1.8)),
+          Text('این ابزار برای برآورد اولیه و کنترل کارگاهی است و جایگزین نقشه‌ها، مشخصات فنی، گزارش ژئوتکنیک یا محاسبات مهندسی و ضوابط لازم‌الاجرا نیست.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12, height: 1.8)),
         ],
       ),
     );
