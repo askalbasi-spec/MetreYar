@@ -44,7 +44,6 @@ class _ProjectEditorState extends State<_ProjectEditor>{
 class _HistoryTab extends StatefulWidget {const _HistoryTab();@override State<_HistoryTab> createState()=>_HistoryTabState();}
 class _HistoryTabState extends State<_HistoryTab>{late Future<List<Map<String,dynamic>>> data;@override void initState(){super.initState();reload();}void reload()=>data=WorkspaceStore.history();
  @override Widget build(BuildContext context)=>FutureBuilder<List<Map<String,dynamic>>>(future:data,builder:(c,s){final a=s.data??[];return ListView(padding:const EdgeInsets.all(16),children:[Row(children:[const Expanded(child:Text('سوابق محاسبات',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold))),TextButton(onPressed:a.isEmpty?null:()async{await WorkspaceStore.clearHistory();setState(reload);},child:const Text('پاک‌کردن'))]),if(s.connectionState!=ConnectionState.done)const Center(child:CircularProgressIndicator())else if(a.isEmpty)const Text('نتایج محاسبات انجام‌شده در این بخش ذخیره می‌شوند.')else for(final x in a)Card(child:ExpansionTile(title:Text(x['title']?.toString()??''),subtitle:Text(x['result']?.toString()??''),childrenPadding:const EdgeInsets.all(14),children:[Text('فرمول: '+(x['formula']?.toString()??'')),Text('ورودی‌ها: '+(x['inputs']?.toString()??'')),Text('زمان: '+(x['at']?.toString()??''))]))]);});}
-}
 
 class _ConverterTab extends StatefulWidget {const _ConverterTab();@override State<_ConverterTab> createState()=>_ConverterTabState();}
 class _ConverterTabState extends State<_ConverterTab>{
