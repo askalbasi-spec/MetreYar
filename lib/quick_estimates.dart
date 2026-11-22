@@ -457,8 +457,8 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
             ],
           ] else ...[
             const SizedBox(height: 18),
-            const Card(child: Padding(
-              padding: EdgeInsets.all(16),
+            Card(child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Text('راهنمای کنترل اولیه', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
             )),
             const SizedBox(height: 8),
