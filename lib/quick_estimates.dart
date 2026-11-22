@@ -269,7 +269,7 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
     return parseEstimateNumber(controller.text, label: label, allowZero: allowZero);
   }
 
-  void _calculate() {
+  Future<void> _calculate() async {
     try {
       final v = _value;
       String result;
