@@ -291,26 +291,6 @@ class HomePage extends StatelessWidget {
       ),
     );
 
-  Widget _recentCalculation(AppPalette palette, String title, String tag, IconData icon, VoidCallback onTap) =>
-    Material(
-      color: palette.background.withValues(alpha: .82),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 12),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), border: Border.all(color: palette.accent.withValues(alpha: .7))),
-          child: Row(children: [
-            Icon(icon, color: palette.primary, size: 22),
-            const SizedBox(width: 8),
-            Expanded(child: Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800))),
-            Text(tag, style: TextStyle(color: palette.primary, fontSize: 11, fontWeight: FontWeight.w800)),
-          ]),
-        ),
-      ),
-    );
-
   void _openCalculator(BuildContext context, Widget page) => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
 }
 
