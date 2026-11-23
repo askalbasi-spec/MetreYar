@@ -56,6 +56,9 @@ jobs:
       - name: Remove generated placeholder widget test
         run: rm -f test/widget_test.dart
 
+      - name: Apply launcher icon
+        run: cp -r assets/icon/android/mipmap-* android/app/src/main/res/
+
       - name: Set app label
         run: sed -i 's/android:label="metreyar"/android:label="متره‌یار"/' android/app/src/main/AndroidManifest.xml
 

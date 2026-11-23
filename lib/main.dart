@@ -8,7 +8,12 @@ import 'core/calculations.dart';
 import 'core/economy.dart';
 import 'core/format.dart';
 import 'core/purchase.dart';
+import 'animated_widgets.dart';
 import 'shop_page.dart';
+import 'tools/converter_page.dart';
+import 'tools/form_tool_page.dart';
+import 'tools/survey_page.dart';
+import 'core/engtools.dart';
 import 'tools/boq_page.dart';
 import 'tools/level_page.dart';
 import 'tools/leveling_page.dart';
@@ -18,6 +23,7 @@ import 'workspace.dart';
 
 const _gold = Color(0xFFD6AD55);
 const _silver = Color(0xFFD9DEE7);
+final GlobalKey<NavigatorState> _navKey = GlobalKey<NavigatorState>();
 final RouteObserver<PageRoute<dynamic>> _homeRouteObserver = RouteObserver<PageRoute<dynamic>>();
 
 class AppPalette {
@@ -105,6 +111,8 @@ class _MetreYarAppState extends State<MetreYarApp> {
     );
     return EconomyScope(economy: widget.economy, child: MaterialApp(
       title: 'متره‌وبرآوردیار', debugShowCheckedModeBanner: false,
+      navigatorKey: _navKey,
+      builder: (context, child) => Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox.shrink()),
       navigatorObservers: [_homeRouteObserver],
       theme: ThemeData(
         useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: palette.background,
@@ -121,9 +129,9 @@ class _MetreYarAppState extends State<MetreYarApp> {
       ),
       home: Directionality(textDirection: TextDirection.rtl, child: _loaded
         ? HomePage(profile: _profile, palette: palette,
-            onOpenProfile: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfilePage(initialProfile: _profile, onSaved: _saveProfile))),
-            onOpenSettings: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SettingsPage(
-              selectedTheme: _themeKey, profile: _profile, onThemeChanged: _saveTheme, onProfileSaved: _saveProfile))))
+            onOpenProfile: () => _navKey.currentState!.push(MaterialPageRoute<void>(builder: (_) => ProfilePage(initialProfile: _profile, onSaved: _saveProfile))),
+            onOpenSettings: () => _navKey.currentState!.push(MaterialPageRoute<void>(builder: (_) => SettingsPage(
+              initialTheme: _themeKey, profile: _profile, onThemeChanged: _saveTheme, onProfileSaved: _saveProfile))))
         : const Scaffold(body: Center(child: CircularProgressIndicator()))),
     ));
   }
@@ -192,6 +200,8 @@ class HomePage extends StatelessWidget {
             _metalPanel(
               palette: palette,
               child: Column(children: [
+                const AnimatedLogo(size: 76),
+                const SizedBox(height: 8),
                 Text('متره و برآورد، دقیق‌تر و سریع‌تر',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: palette.primary, fontSize: 19, fontWeight: FontWeight.w900, height: 1.5)),
@@ -249,6 +259,36 @@ class HomePage extends StatelessWidget {
                     palette: palette, icon: Icons.receipt_long_outlined, title: 'صورت‌مقادیر و برآورد',
                     onTap: () => _openCalculator(context, const BoqPage()))),
                 ]),
+                const SizedBox(height: 9),
+                Row(children: [
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.swap_horiz, title: 'تبدیل واحد',
+                    onTap: () => _openCalculator(context, const ConverterPage()))),
+                  const SizedBox(width: 9),
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.category_outlined, title: 'هندسه: مساحت و حجم',
+                    onTap: () => _openCalculator(context, FormToolPage(title: 'هندسه: مساحت و حجم', tools: shapeTools)))),
+                ]),
+                const SizedBox(height: 9),
+                Row(children: [
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.horizontal_rule, title: 'تیر: لنگر و خیز',
+                    onTap: () => _openCalculator(context, FormToolPage(title: 'تیر ساده', tools: [beamTool])))),
+                  const SizedBox(width: 9),
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.stairs_outlined, title: 'پلکان',
+                    onTap: () => _openCalculator(context, FormToolPage(title: 'پلکان', tools: [stairTool])))),
+                ]),
+                const SizedBox(height: 9),
+                Row(children: [
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.science_outlined, title: 'مصالح بتن',
+                    onTap: () => _openCalculator(context, FormToolPage(title: 'مصالح بتن', tools: [mixTool])))),
+                  const SizedBox(width: 9),
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.explore_outlined, title: 'نقشه‌برداری و آزیموت',
+                    onTap: () => _openCalculator(context, const SurveyPage()))),
+                ]),
                 const AdSlot(),
               ]),
             ),
@@ -262,24 +302,7 @@ class HomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 15),
-            Container(
-              padding: const EdgeInsets.fromLTRB(15, 13, 15, 15),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFB477),
-                borderRadius: BorderRadius.circular(17),
-                border: Border.all(color: const Color(0xFFFFD18D), width: 2),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .2), blurRadius: 10, offset: const Offset(0, 4))],
-              ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
-                Text('نکته اجرایی امروز', style: TextStyle(color: Color(0xFF172033), fontSize: 17, fontWeight: FontWeight.w900)),
-                SizedBox(height: 8),
-                Text('رعایت پوشش بتن (کاور) در فونداسیون برای جلوگیری از زنگ‌زدگی میلگردها الزامی است.',
-                  style: TextStyle(color: Color(0xFF172033), height: 1.7, fontSize: 13, fontWeight: FontWeight.w700)),
-                SizedBox(height: 5),
-                Text('نکته: قبل از بتن‌ریزی، مربوط کردن قالب‌ها فراموش نشود.',
-                  style: TextStyle(color: Color(0xFF172033), height: 1.7, fontSize: 13, fontWeight: FontWeight.w700)),
-              ]),
-            ),
+            const DailyTipCard(),
             const SizedBox(height: 13),
             OutlinedButton.icon(
               onPressed: () => _openCalculator(context, const WorkspacePage()),
@@ -399,35 +422,59 @@ class _RecentCalculationsState extends State<_RecentCalculations> with RouteAwar
   );
 }
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key, required this.selectedTheme, required this.profile, required this.onThemeChanged, required this.onProfileSaved});
-  final String selectedTheme;
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key, required this.initialTheme, required this.profile, required this.onThemeChanged, required this.onProfileSaved});
+  final String initialTheme;
   final Map<String, String> profile;
-  final ValueChanged<String> onThemeChanged;
+  final Future<void> Function(String) onThemeChanged;
   final Future<void> Function(Map<String, String>) onProfileSaved;
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  late String _theme = widget.initialTheme;
+  late Map<String, String> _profile = Map<String, String>.from(widget.profile);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(appBar: AppBar(title: const Text('تنظیمات برنامه')),
       body: ListView(padding: const EdgeInsets.all(16), children: [
+        Card(child: ListTile(
+          key: const Key('settings-profile'),
+          leading: const Icon(Icons.person_outline), title: const Text('مشخصات کاربری', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('نام، تماس، رشته و آواتار'), trailing: const Icon(Icons.chevron_left),
+          onTap: () async {
+            await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfilePage(initialProfile: _profile, onSaved: (v) async {
+              await widget.onProfileSaved(v);
+              if (mounted) setState(() => _profile = Map<String, String>.from(v));
+            })));
+          })),
+        const SizedBox(height: 10),
+        Card(child: ListTile(
+          leading: const Icon(Icons.workspace_premium_outlined), title: const Text('اشتراک و سکه', style: TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: const Text('خرید سکه، اشتراک ماهانه و سالانه'), trailing: const Icon(Icons.chevron_left),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ShopPage())))),
+        const SizedBox(height: 20),
         const Text('انتخاب پوسته ظاهری', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
         const SizedBox(height: 6),
         const Text('با انتخاب هر تم، رنگ‌بندی بخش‌های اصلی برنامه تغییر می‌کند.'),
         const SizedBox(height: 12),
         for (final entry in _palettes.entries)
           Card(child: ListTile(
+            key: Key('theme-${entry.key}'),
             leading: Container(width: 48, height: 42, decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10), gradient: LinearGradient(colors: [entry.value.background, entry.value.surface, entry.value.primary])),
               child: const Icon(Icons.palette_outlined, color: Colors.white)),
             title: Text(entry.value.name, style: const TextStyle(fontWeight: FontWeight.w800)),
             subtitle: Text(entry.value.subtitle),
-            trailing: selectedTheme == entry.key ? Icon(Icons.check_circle, color: entry.value.primary) : const Icon(Icons.chevron_left),
-            onTap: () => onThemeChanged(entry.key),
+            trailing: _theme == entry.key ? Icon(Icons.check_circle, color: entry.value.primary) : const Icon(Icons.chevron_left),
+            onTap: () async {
+              setState(() => _theme = entry.key);
+              await widget.onThemeChanged(entry.key);
+            },
           )),
-        const SizedBox(height: 20),
-        Card(child: ListTile(leading: const Icon(Icons.person_outline), title: const Text('مشخصات کاربری', style: TextStyle(fontWeight: FontWeight.w800)),
-          subtitle: const Text('نام، تماس، رشته و آواتار'), trailing: const Icon(Icons.chevron_left),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfilePage(initialProfile: profile, onSaved: onProfileSaved))))),
       ]));
   }
 }
