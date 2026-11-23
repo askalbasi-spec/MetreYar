@@ -1,6 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/adivery_ad_service.dart';
+import 'core/ads.dart';
+import 'core/bazaar_purchase_service.dart';
 import 'core/calculations.dart';
+import 'core/economy.dart';
+import 'core/format.dart';
+import 'core/purchase.dart';
+import 'shop_page.dart';
+import 'tools/boq_page.dart';
+import 'tools/level_page.dart';
+import 'tools/leveling_page.dart';
+import 'tools/scientific_page.dart';
 import 'quick_estimates.dart';
 import 'workspace.dart';
 
@@ -22,10 +34,26 @@ const _palettes = <String, AppPalette>{
   'fire': AppPalette('قرمز-خاکستری هشدار', 'Fire Hazard', Color(0xFF922B21), Color(0xFF34495E), Color(0xFFF39C12), Color(0xFFEAECEE), Color(0xFFE74C3C), Color(0xFFFFFFFF)),
 };
 
-void main() => runApp(const MetreYarApp());
+const _bazaarRsaKey = String.fromEnvironment('BAZAAR_RSA_KEY');
+const _adiveryAppId = String.fromEnvironment('ADIVERY_APP_ID');
+const _adiveryBannerId = String.fromEnvironment('ADIVERY_BANNER_ID');
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final economy = Economy(
+    purchases: _bazaarRsaKey.isEmpty ? StubPurchaseService() : BazaarPurchaseService(rsaKey: _bazaarRsaKey),
+    ads: _adiveryAppId.isEmpty || _adiveryBannerId.isEmpty
+        ? const NoAdService()
+        : AdiveryAdService(appId: _adiveryAppId, bannerId: _adiveryBannerId),
+  );
+  await economy.load();
+  runApp(MetreYarApp(economy: economy));
+  unawaited(economy.restorePurchases());
+}
 
 class MetreYarApp extends StatefulWidget {
-  const MetreYarApp({super.key});
+  const MetreYarApp({super.key, required this.economy});
+  final Economy economy;
   @override
   State<MetreYarApp> createState() => _MetreYarAppState();
 }
@@ -75,7 +103,7 @@ class _MetreYarAppState extends State<MetreYarApp> {
       primary: palette.primary, secondary: palette.secondary, surface: palette.surface,
       onSurface: palette.onSurface, outline: palette.accent,
     );
-    return MaterialApp(
+    return EconomyScope(economy: widget.economy, child: MaterialApp(
       title: 'متره‌وبرآوردیار', debugShowCheckedModeBanner: false,
       navigatorObservers: [_homeRouteObserver],
       theme: ThemeData(
@@ -97,7 +125,7 @@ class _MetreYarAppState extends State<MetreYarApp> {
             onOpenSettings: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => SettingsPage(
               selectedTheme: _themeKey, profile: _profile, onThemeChanged: _saveTheme, onProfileSaved: _saveProfile))))
         : const Scaffold(body: Center(child: CircularProgressIndicator()))),
-    );
+    ));
   }
 }
 
@@ -120,7 +148,14 @@ class HomePage extends StatelessWidget {
           SizedBox(height: 3),
           Text('ENGINE PLUS  |  دفتر فنی هوشمند', style: TextStyle(fontSize: 11, letterSpacing: .5, color: _gold)),
         ]),
-        actions: [IconButton(tooltip: 'تنظیمات', onPressed: onOpenSettings, icon: const Icon(Icons.settings_outlined))],
+        actions: [
+          TextButton.icon(
+            key: const Key('shop-chip'),
+            onPressed: () => _openCalculator(context, const ShopPage()),
+            icon: Icon(context.economy.isPro ? Icons.workspace_premium_rounded : Icons.monetization_on_rounded, color: _gold, size: 20),
+            label: Text(context.economy.isPro ? 'ویژه' : fa(context.economy.coins), style: const TextStyle(color: _gold, fontWeight: FontWeight.w800)),
+          ),
+          IconButton(tooltip: 'تنظیمات', onPressed: onOpenSettings, icon: const Icon(Icons.settings_outlined))],
       ),
       body: SafeArea(
         child: ListView(
@@ -193,6 +228,33 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 15),
             _sectionPanel(
               palette: palette,
+              title: 'ابزارهای مهندسی',
+              child: Column(children: [
+                Row(children: [
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.functions, title: 'ماشین‌حساب مهندسی',
+                    onTap: () => _openCalculator(context, const ScientificPage()))),
+                  const SizedBox(width: 9),
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.straighten, title: 'دفتر ترازیابی (نیوو)',
+                    onTap: () => _openCalculator(context, const LevelingPage()))),
+                ]),
+                const SizedBox(height: 9),
+                Row(children: [
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.vertical_align_center, title: 'تراز دیجیتال و شیب‌سنج',
+                    onTap: () => _openCalculator(context, const LevelPage()))),
+                  const SizedBox(width: 9),
+                  Expanded(child: _quickAccessButton(
+                    palette: palette, icon: Icons.receipt_long_outlined, title: 'صورت‌مقادیر و برآورد',
+                    onTap: () => _openCalculator(context, const BoqPage()))),
+                ]),
+                const AdSlot(),
+              ]),
+            ),
+            const SizedBox(height: 15),
+            _sectionPanel(
+              palette: palette,
               title: 'آخرین محاسبات',
               child: _RecentCalculations(
                 palette: palette,
@@ -228,7 +290,7 @@ class HomePage extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => _openCalculator(context, const QuickEstimatesPage()),
               icon: const Icon(Icons.grid_view_rounded),
-              label: const Text('فهرست کامل ۵۳ ابزار'),
+              label: Text('فهرست کامل ${fa(estimateToolCount)} ابزار'),
             ),
             const SizedBox(height: 8),
             Center(child: Text('ENGINE PLUS', style: TextStyle(color: palette.secondary, fontSize: 10, letterSpacing: 2))),

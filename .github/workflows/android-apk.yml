@@ -1,15 +1,26 @@
 name: Android APK
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, "feature/**" ]
     paths:
       - 'lib/**'
       - 'test/**'
+      - 'tools/**'
       - 'pubspec.yaml'
       - 'analysis_options.yaml'
       - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+    inputs:
+      create_draft_release:
+        description: "Create a draft GitHub Release and attach the APK"
+        required: true
+        type: boolean
+        default: false
+      release_tag:
+        description: "Release tag, for example metreyar-v1.3.0"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -17,9 +28,16 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      BAZAAR_RSA_KEY: ${{ secrets.BAZAAR_RSA_KEY }}
+      ADIVERY_APP_ID: ${{ secrets.ADIVERY_APP_ID }}
+      ADIVERY_BANNER_ID: ${{ secrets.ADIVERY_BANNER_ID }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -27,8 +45,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
@@ -39,8 +56,30 @@ jobs:
       - name: Remove generated placeholder widget test
         run: rm -f test/widget_test.dart
 
+      - name: Set app label
+        run: sed -i 's/android:label="metreyar"/android:label="متره‌یار"/' android/app/src/main/AndroidManifest.xml
+
+      - name: Configure release signing
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks
+          {
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyPassword=$KEY_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "storeFile=release.jks"
+          } > android/key.properties
+          python3 tools/apply_signing.py
+
+      - name: Warn when signing is not configured
+        if: ${{ env.KEYSTORE_BASE64 == '' }}
+        run: echo "::warning::No KEYSTORE_BASE64 secret - the APK is debug-signed and must NOT be uploaded to a store."
+
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Patch old plugins for current Gradle
+        run: python3 tools/patch_plugins.py
 
       - name: Analyze
         run: flutter analyze --no-pub --no-fatal-infos
@@ -49,17 +88,34 @@ jobs:
         run: flutter test
 
       - name: Build APK
-        run: flutter build apk --release
-
-      - name: Publish APK as GitHub Release asset
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if ! gh release view metreyar-latest >/dev/null 2>&1; then
-            gh release create metreyar-latest \
-              --title "MetreYar Android APK" \
-              --notes "Latest automatically built APK. This build is for testing and is not signed for store publication." \
-              --prerelease
+          flutter build apk --release \
+            --dart-define=BAZAAR_RSA_KEY="$BAZAAR_RSA_KEY" \
+            --dart-define=ADIVERY_APP_ID="$ADIVERY_APP_ID" \
+            --dart-define=ADIVERY_BANNER_ID="$ADIVERY_BANNER_ID"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: metreyar-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Validate release inputs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_draft_release }}
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "::error::Enter a release tag such as metreyar-v1.3.0."
+            exit 1
           fi
-          gh release upload metreyar-latest build/app/outputs/flutter-apk/app-release.apk \
-            --clobber
+
+      - name: Create draft GitHub Release
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_draft_release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: MetreYar ${{ inputs.release_tag }}
+          draft: true
+          files: build/app/outputs/flutter-apk/app-release.apk
+          generate_release_notes: true

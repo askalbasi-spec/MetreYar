@@ -1,7 +1,14 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'core/ads.dart';
+import 'core/boq.dart';
+import 'core/estimate_engine.dart';
+import 'core/numbers.dart';
 import 'workspace.dart';
+
+export 'core/numbers.dart' show parseEstimateNumber;
+
+/// Number of tools in the full list (used on the home page).
+int get estimateToolCount => _estimates.length;
 
 
 class _InputSpec {
@@ -47,7 +54,7 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id: 10, title: 'ملات و اندود سقف', description: 'محاسبه حجم ملات بر اساس سطح و ضخامت واقعی.', formula: 'مساحت × ضخامت', inputs: [_InputSpec('area', 'مساحت سقف', 'مترمربع'), _InputSpec('thickness', 'ضخامت ملات یا اندود', 'سانتی‌متر')], resultUnit: 'مترمکعب', warning: 'اعداد ۵۰۰ و ۷۷۰ لیتر در هر مترمربع که در متن اولیه آمده‌اند بسیار بزرگ و نیازمند راستی‌آزمایی منبع و واحد هستند؛ به‌صورت پیش‌فرض وارد نشده‌اند. ضخامت واقعی را وارد کنید.'),
   _EstimateSpec(id: 11, title: 'انتخاب اولیه نوع فونداسیون', description: 'راهنمای عوامل مؤثر بر انتخاب پی.', guide: 'انتخاب پی منفرد، نواری، گسترده یا عمیق بر اساس نوع خاک به‌تنهایی ممکن نیست. گزارش مکانیک خاک، ظرفیت باربری مجاز، نشست کل و نسبی، سطح آب زیرزمینی، بار ستون‌ها، همجواری‌ها و محدودیت اجرا لازم است. تصمیم نهایی باید بر پایه گزارش ژئوتکنیک و طراحی مهندس محاسب باشد.'),
   _EstimateSpec(id: 12, title: 'ضریب زلزله (C)', description: 'راهنمای پارامترهای ضریب زلزله و استاندارد ۲۸۰۰.', guide: 'ضریب زلزله تابع ویرایش معتبر استاندارد ۲۸۰۰، پهنه خطر نسبی، نوع زمین، اهمیت ساختمان، سیستم سازه‌ای و دوره تناوب است. چون ویرایش و اصلاحیه‌های معتبر باید کنترل شوند، این نسخه عدد ثابت ارائه نمی‌کند. پیش از استفاده، متن رسمی و آخرین اصلاحیه‌های استاندارد ۲۸۰۰ را بررسی کنید.'),
-  _EstimateSpec(id: 13, title: 'حجم بتن اجزای مختلف', description: 'محاسبه حجم منشوری یا استوانه‌ای برای اعضای بتنی.', formula: 'منشور: طول × عرض × ارتفاع | استوانه: π × قطر² ÷ ۴ × ارتفاع', inputs: [_InputSpec('length', 'طول یا ارتفاع عضو', 'متر'), _InputSpec('width', 'عرض عضو (برای منشور)', 'متر'), _InputSpec('height', 'ارتفاع / ضخامت', 'متر')], resultUnit: 'مترمکعب', warning: 'برای عضو مستطیلی از هر سه ورودی استفاده می‌شود. برای مخزن یا لوله استوانه‌ای، عرض را برابر قطر داخلی قرار دهید؛ حجم خالص/ناخالص را متناسب با هدف متره انتخاب کنید.'),
+  _EstimateSpec(id: 13, title: 'حجم بتن ستون یا شمع استوانه‌ای', description: 'محاسبه حجم بتن عضو استوانه‌ای از قطر و ارتفاع.', formula: 'π × قطر² ÷ ۴ × ارتفاع', inputs: [_InputSpec('diameter', 'قطر', 'متر'), _InputSpec('height', 'ارتفاع', 'متر')], resultUnit: 'مترمکعب', warning: 'برای عضو مستطیلی از ابزار «حجم بتن مستطیلی» استفاده کنید. حجم خالص یا ناخالص را متناسب با هدف متره انتخاب کنید.'),
   _EstimateSpec(id: 14, title: 'درز انقطاع ساختمان', description: 'راهنمای کنترل فاصله لرزه‌ای ساختمان‌های مجاور.', guide: 'درز انقطاع تابع ارتفاع، جابجایی جانبی طرح، ضوابط استاندارد ۲۸۰۰ و شرایط ساختمان مجاور است. عبارت «تا ۸ طبقه» به‌تنهایی برای تعیین فاصله کافی نیست. مقدار نهایی را از ضابطه معتبر و محاسبات پروژه استخراج کنید و جزئیات پوشش درز را نیز در نظر بگیرید.'),
   _EstimateSpec(id: 15, title: 'سطح اشغال و قاعده ۲۵ متر و ۴۵ درجه', description: 'راهنمای بررسی اولیه نورگیری و محدودیت‌های حجمی.', guide: 'قاعده موسوم به ۲۵ متر و ۴۵ درجه را نباید قانون یکسان و سراسری تلقی کرد. سطح اشغال، عقب‌نشینی، نورگیری و محدودیت ارتفاع تابع طرح تفصیلی، پهنه، دستور نقشه و ضوابط شهرداری محل است. ملاک اجرا، دستور نقشه و مقررات محلیِ به‌روز است.'),
   _EstimateSpec(id: 16, title: 'تأمین پارکینگ و رمپ', description: 'چک‌لیست اولیه پارکینگ فضاهای مختلف.', guide: 'تعداد پارکینگ موردنیاز، ابعاد جای پارک، عرض مسیر، شیب و پاگرد رمپ به کاربری، مساحت، ضوابط شهرداری و مقررات ملی ساختمان وابسته است. بدون شهر و دستور نقشه عدد ثابت قابل اتکا نیست. پیش از تثبیت پلان، گردش خودرو، شعاع گردش، ارتفاع آزاد و دسترسی افراد کم‌توان را نیز بررسی کنید.'),
@@ -61,7 +68,6 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id:23,title:'سرانه کل بتن سازه',description:'حجم بتن کل از روی زیربنا و سرانه مصرف.',formula:'زیربنا × سرانه بتن',inputs:[_InputSpec('area','زیربنای کل','مترمربع'),_InputSpec('rate','سرانه بتن','مترمکعب بر مترمربع',initial:'0.40')],resultUnit:'مترمکعب بتن',warning:'بازه ۰٫۳۵ تا ۰٫۴۵ صرفاً تخمین اولیه ساختمان متعارف است.'),
   _EstimateSpec(id:24,title:'مصالح سنگی بتن',description:'تخمین شن، ماسه و وزن کل مصالح سنگی.',formula:'حجم بتن × ضرایب مصرف',inputs:[_InputSpec('volume','حجم بتن','مترمکعب'),_InputSpec('total','مصالح سنگی کل','کیلوگرم بر مترمکعب',initial:'2200'),_InputSpec('gravel','شن','مترمکعب بر مترمکعب بتن',initial:'0.80'),_InputSpec('sand','ماسه','مترمکعب بر مترمکعب بتن',initial:'0.45')],resultUnit:'کیلوگرم و مترمکعب'),
   _EstimateSpec(id:25,title:'سرانه میلگرد قاب خمشی',description:'برآورد میلگرد سازه بتنی بر اساس سرانه.',formula:'زیربنا × سرانه میلگرد',inputs:[_InputSpec('area','زیربنای کل','مترمربع'),_InputSpec('rate','سرانه میلگرد','کیلوگرم بر مترمربع',initial:'55')],resultUnit:'کیلوگرم',warning:'بازه ۴۵ تا ۷۰ کیلوگرم فقط تخمین اولیه است؛ لیستوفر ملاک سفارش است.'),
-  _EstimateSpec(id:26,title:'ملات کف‌سازی با سرانه',description:'محاسبه ملات کف با نرخ مصرف قابل ویرایش.',formula:'مساحت × لیتر بر مترمربع',inputs:[_InputSpec('area','مساحت کف','مترمربع'),_InputSpec('rate','مصرف ملات','لیتر بر مترمربع',initial:'30')],resultUnit:'لیتر ملات'),
   _EstimateSpec(id:27,title:'ماسه ملات فرش کف',description:'تخمین ماسه بر اساس حجم ملات.',formula:'حجم ملات × سرانه ماسه',inputs:[_InputSpec('volume','حجم ملات','مترمکعب'),_InputSpec('rate','ماسه','کیلوگرم بر مترمکعب',initial:'1670')],resultUnit:'کیلوگرم ماسه'),
   _EstimateSpec(id:28,title:'لوله گرمایش از کف',description:'تخمین طول لوله موردنیاز سطح تحت پوشش.',formula:'مساحت × طول لوله در مترمربع',inputs:[_InputSpec('area','مساحت تحت پوشش','مترمربع'),_InputSpec('rate','طول لوله','متر بر مترمربع',initial:'3')],resultUnit:'متر لوله',warning:'فاصله لوله‌ها و طول مجاز مدار باید در طراحی کنترل شود.'),
   _EstimateSpec(id:29,title:'تیرچه سقف تیرچه‌بلوک',description:'تخمین مجموع طول تیرچه‌ها از مساحت سقف.',formula:'مساحت × ضریب طول تیرچه',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('rate','ضریب طول','متر بر مترمربع',initial:'1.5')],resultUnit:'متر طول تیرچه'),
@@ -69,12 +75,9 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id:31,title:'بتن سقف تیرچه‌بلوک',description:'تخمین بتن مصرفی سقف سبک.',formula:'مساحت × مصرف بتن',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('rate','مصرف بتن','مترمکعب بر مترمربع',initial:'0.095')],resultUnit:'مترمکعب بتن'),
   _EstimateSpec(id:32,title:'ورق و بتن سقف عرشه فولادی',description:'محاسبه ورق با پرت و بتن با ضخامت مؤثر.',formula:'ورق=مساحت×(۱+پرت)؛ بتن=مساحت×(ضخامت−نصف گوه)',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('waste','پرت ورق','درصد',initial:'7'),_InputSpec('slab','ضخامت دال','متر',initial:'0.12'),_InputSpec('deck','ارتفاع گوه عرشه','متر',initial:'0.075')],resultUnit:'مترمربع ورق و مترمکعب بتن'),
   _EstimateSpec(id:33,title:'سقف دال مجوف یوبوت/کوبیاکس',description:'تخمین تعداد قالب و بتن با ضخامت معادل.',formula:'قالب=مساحت÷شبکه؛ بتن=مساحت×ضخامت معادل',inputs:[_InputSpec('area','مساحت سقف','مترمربع'),_InputSpec('module','مساحت شبکه هر قالب','مترمربع',initial:'0.25'),_InputSpec('waste','پرت قالب','درصد',initial:'4'),_InputSpec('thickness','ضخامت معادل بتن','متر',initial:'0.18')],resultUnit:'عدد قالب و مترمکعب بتن',warning:'ضخامت معادل و چیدمان قالب باید از نقشه سیستم استخراج شود.'),
-  _EstimateSpec(id:34,title:'ملات دیوارچینی با ضریب حجمی',description:'محاسبه ملات با سهم حجمی قابل تنظیم.',formula:'حجم دیوار × سهم ملات',inputs:[_InputSpec('wall','حجم دیوار','مترمکعب'),_InputSpec('factor','سهم ملات','ضریب',initial:'0.33')],resultUnit:'مترمکعب ملات',warning:'سهم یک‌سوم برای همه انواع بلوک و آجر قابل تعمیم نیست.'),
   _EstimateSpec(id:35,title:'سیمان و ماسه ملات ۱ به ۶',description:'تخمین اجزای ملات دیوارچینی.',formula:'حجم ملات × سرانه مصالح',inputs:[_InputSpec('volume','حجم ملات','مترمکعب'),_InputSpec('cement','سیمان','کیلوگرم بر مترمکعب',initial:'300'),_InputSpec('sand','ماسه','کیلوگرم بر مترمکعب',initial:'1800')],resultUnit:'کیلوگرم'),
   _EstimateSpec(id:36,title:'آجر بر اساس حجم دیوار',description:'تخمین تعداد آجر در حجم دیوار.',formula:'حجم دیوار × تعداد آجر در مترمکعب',inputs:[_InputSpec('volume','حجم دیوار','مترمکعب'),_InputSpec('rate','تعداد آجر','عدد بر مترمکعب',initial:'610')],resultUnit:'عدد آجر'),
   _EstimateSpec(id:37,title:'بلوک سیمانی یا سفالی تیغه',description:'تعداد بلوک با کسر بازشو و افزودن پرت.',formula:'(مساحت−بازشو)÷مساحت بلوک×(۱+پرت)',inputs:[_InputSpec('area','مساحت دیوار','مترمربع'),_InputSpec('openings','مساحت بازشو','مترمربع',initial:'0'),_InputSpec('block','مساحت نمای بلوک','مترمربع',initial:'0.08'),_InputSpec('waste','پرت','درصد',initial:'6')],resultUnit:'عدد بلوک'),
-  _EstimateSpec(id:38,title:'لوله آب سرد و گرم',description:'تخمین طول لوله‌کشی آب بر اساس زیربنا.',formula:'زیربنا × سرانه طول لوله',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه لوله','متر بر مترمربع',initial:'0.55')],resultUnit:'متر لوله'),
-  _EstimateSpec(id:39,title:'لوله فاضلاب، باران و هواکش',description:'تخمین طول لوله‌های فاضلاب و تهویه.',formula:'زیربنا × سرانه طول لوله',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه لوله','متر بر مترمربع',initial:'0.65')],resultUnit:'متر لوله'),
   _EstimateSpec(id:40,title:'مصالح خشک اندودکاری',description:'تخمین مصالح خشک بر اساس حجم اندود.',formula:'حجم اندود × سرانه مصالح خشک',inputs:[_InputSpec('volume','حجم اندود','مترمکعب'),_InputSpec('rate','مصالح خشک','کیلوگرم بر مترمکعب',initial:'1850')],resultUnit:'کیلوگرم مصالح'),
   _EstimateSpec(id:41,title:'پوشش گچ و خاک',description:'تعداد کیسه ۴۰ کیلویی بر اساس سطح و پرت.',formula:'مساحت÷پوشش هر کیسه×(۱+پرت)',inputs:[_InputSpec('area','سطح','مترمربع'),_InputSpec('coverage','پوشش هر کیسه','مترمربع',initial:'2.8'),_InputSpec('waste','پرت','درصد',initial:'5')],resultUnit:'کیسه ۴۰ کیلویی'),
   _EstimateSpec(id:42,title:'پوشش گچ سفیدکاری',description:'تعداد کیسه گچ سفید ۴۰ کیلویی.',formula:'مساحت÷پوشش هر کیسه×(۱+پرت)',inputs:[_InputSpec('area','سطح','مترمربع'),_InputSpec('coverage','پوشش هر کیسه','مترمربع',initial:'11'),_InputSpec('waste','پرت','درصد',initial:'5')],resultUnit:'کیسه ۴۰ کیلویی'),
@@ -87,7 +90,6 @@ const _estimates = <_EstimateSpec>[
   _EstimateSpec(id:49,title:'لوله‌کشی آب و فاضلاب',description:'تخمین طول لوله آب سرد و گرم و لوله فاضلاب، باران و هواکش.',formula:'زیربنا × سرانه هر گروه لوله',inputs:[_InputSpec('area','زیربنای کل','مترمربع'),_InputSpec('waterRate','سرانه آب سرد و گرم','متر بر مترمربع',initial:'0.55'),_InputSpec('drainRate','سرانه فاضلاب و هواکش','متر بر مترمربع',initial:'0.65')],resultUnit:'متر لوله',warning:'این سرانه‌ها فقط برای تخمین اولیه‌اند؛ تعداد سرویس‌ها، رایزرها و نقشه تأسیسات ملاک متره است.'),
   _EstimateSpec(id:50,title:'سیم‌کشی و تجهیزات برق',description:'تخمین طول سیم و تعداد کلید و پریز و تابلو.',formula:'زیربنا × سرانه سیم',inputs:[_InputSpec('area','زیربنا','مترمربع'),_InputSpec('rate','سرانه سیم','متر بر مترمربع',initial:'5'),_InputSpec('points','تعداد کلید و پریز','عدد',initial:'30')],resultUnit:'متر سیم و عدد تجهیزات',warning:'طول واقعی به تعداد مدارها، رشته‌ها، مسیرها و نقشه برق وابسته است.'),
   _EstimateSpec(id:51,title:'حجم بتن مستطیلی',description:'محاسبه حجم بتن عضو مستطیلی از طول، عرض و ارتفاع.',formula:'طول × عرض × ارتفاع',inputs:[_InputSpec('length','طول','متر'),_InputSpec('width','عرض','متر'),_InputSpec('height','ارتفاع','متر')],resultUnit:'مترمکعب بتن'),
-  _EstimateSpec(id:52,title:'وزن میلگرد',description:'محاسبه وزن تقریبی میلگرد از قطر و طول.',formula:'قطر² ÷ ۱۶۲ × طول',inputs:[_InputSpec('diameter','قطر میلگرد','میلی‌متر'),_InputSpec('length','طول کل','متر')],resultUnit:'کیلوگرم'),
   _EstimateSpec(id:53,title:'مساحت مستطیل',description:'محاسبه مساحت سطح مستطیلی.',formula:'طول × عرض',inputs:[_InputSpec('length','طول','متر'),_InputSpec('width','عرض','متر')],resultUnit:'مترمربع'),
 ]; 
 
@@ -164,7 +166,7 @@ class _EstimateTabGroup extends StatelessWidget {
               ]),
             ),
           ),
-          for (final item in _estimates.where((e) => _categoryForEstimate(e.id) == category))
+          for (final item in _estimates.where((e) => _categoryForEstimate(e.id) == category && e.inputs.isNotEmpty))
             Card(
               margin: const EdgeInsets.only(bottom: 9),
               child: ListTile(
@@ -184,6 +186,26 @@ class _EstimateTabGroup extends StatelessWidget {
                 )),
               ),
             ),
+          if (_estimates.any((e) => _categoryForEstimate(e.id) == category && e.inputs.isEmpty))
+            Card(
+              margin: const EdgeInsets.only(bottom: 9),
+              child: ExpansionTile(
+                key: PageStorageKey('guides-$category'),
+                leading: Icon(Icons.menu_book_outlined, color: Theme.of(context).colorScheme.primary),
+                title: const Text('راهنمای مهندسی (بدون محاسبه عددی)', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                children: [
+                  for (final item in _estimates.where((e) => _categoryForEstimate(e.id) == category && e.inputs.isEmpty))
+                    ListTile(
+                      title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                      subtitle: Text(item.description),
+                      trailing: const Icon(Icons.arrow_back_ios_new_rounded, size: 14),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                        builder: (_) => _EstimateDetailPage(spec: item),
+                      )),
+                    ),
+                ],
+              ),
+            ),
           const SizedBox(height: 10),
         ],
       ],
@@ -197,42 +219,6 @@ class _EstimateDetailPage extends StatefulWidget {
 
   @override
   State<_EstimateDetailPage> createState() => _EstimateDetailPageState();
-}
-
-/// Converts Persian/Arabic digits and common locale-specific separators to a number.
-double parseEstimateNumber(
-  String raw, {
-  required String label,
-  bool allowZero = false,
-}) {
-  final normalizedDigits = String.fromCharCodes(raw.runes.map((rune) {
-    if (rune >= 0x06F0 && rune <= 0x06F9) return rune - 0x06F0 + 0x30;
-    if (rune >= 0x0660 && rune <= 0x0669) return rune - 0x0660 + 0x30;
-    if (rune >= 0xFF10 && rune <= 0xFF19) return rune - 0xFF10 + 0x30;
-    return rune;
-  }));
-  var normalized = normalizedDigits
-      .replaceAll('٫', '.')
-      .replaceAll('٬', '')
-      .replaceAll(' ', '')
-      .replaceAll(String.fromCharCode(0x00A0), '')
-      .replaceAll(String.fromCharCode(0x200E), '')
-      .replaceAll(String.fromCharCode(0x200F), '');
-  if (normalized.contains(',') && normalized.contains('.')) {
-    normalized = normalized.replaceAll(',', '');
-  } else if (normalized.contains(',')) {
-    final groups = normalized.split(',');
-    final isThousands = groups.length > 1 &&
-        groups.first.isNotEmpty && groups.first.length <= 3 &&
-        groups.skip(1).every((group) => group.length == 3);
-    normalized = isThousands ? normalized.replaceAll(',', '') : normalized.replaceAll(',', '.');
-  }
-  final value = double.tryParse(normalized);
-  if (value == null || !value.isFinite || (allowZero ? value < 0 : value <= 0)) {
-    final requirement = allowZero ? 'صفر یا عدد مثبت' : 'عدد مثبت';
-    throw FormatException('مقدار «$label» باید $requirement معتبر باشد.');
-  }
-  return value;
 }
 
 class _EstimateDetailPageState extends State<_EstimateDetailPage> {
@@ -266,139 +252,25 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
     return parseEstimateNumber(controller.text, label: label, allowZero: allowZero);
   }
 
+  Future<void> _addToBoq() async {
+    final q = parseResultQuantity(_result ?? '');
+    if (q == null) return;
+    final project = await WorkspaceStore.activeProject();
+    await BoqStore.upsert(BoqItem(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: widget.spec.title,
+      unit: q.unit,
+      qty: q.qty,
+      unitPrice: 0,
+      projectId: project?.id,
+    ));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('به صورت‌مقادیر افزوده شد. قیمت واحد را آنجا وارد کنید.')));
+  }
+
   Future<void> _calculate() async {
     try {
-      final v = _value;
-      String result;
-      switch (widget.spec.id) {
-        case 51:
-          result = '${(v('length') * v('width') * v('height')).toStringAsFixed(3)} مترمکعب بتن';
-          break;
-        case 52:
-          result = '${(v('diameter') * v('diameter') / 162 * v('length')).toStringAsFixed(2)} کیلوگرم میلگرد';
-          break;
-        case 53:
-          result = '${(v('length') * v('width')).toStringAsFixed(2)} مترمربع';
-          break;
-        case 1:
-          result = '${(v('diameter') * v('diameter') / 162 * v('length')).toStringAsFixed(2)} کیلوگرم';
-        case 2:
-        case 4:
-        case 7:
-        case 19:
-          result = widget.spec.id == 7
-              ? (v('area') * v('rate')).ceil().toString()
-              : (v('area') * v('rate')).toStringAsFixed(2);
-          if (widget.spec.id == 2 || widget.spec.id == 4) {
-            final kg = v('area') * v('rate');
-            result = '${kg.toStringAsFixed(1)} کیلوگرم (حدود ${(kg / 1000).toStringAsFixed(3)} تن)';
-          }
-          if (widget.spec.id == 7) result += ' عدد آجر';
-          if (widget.spec.id == 19) result += ' واحد ماده';
-          break;
-        case 3:
-          result = '${(v('volume') * v('rate')).toStringAsFixed(2)} کیلوگرم';
-        case 8:
-          final mortar = v('wall') * v('factor');
-          final cement = mortar * v('cement');
-          final sand = mortar * v('sand');
-          result = 'ملات: ${mortar.toStringAsFixed(3)} مترمکعب\nسیمان: ${cement.toStringAsFixed(1)} کیلوگرم\nماسه: ${sand.toStringAsFixed(1)} کیلوگرم';
-        case 9:
-        case 10:
-          result = '${(v('area') * v('thickness') / 100).toStringAsFixed(3)} مترمکعب';
-        case 13:
-          final prism = v('length') * v('width') * v('height');
-          final cylinder = math.pi * math.pow(v('width') / 2, 2) * v('height');
-          result = 'حجم منشور مستطیلی: ${prism.toStringAsFixed(3)} مترمکعب\nحجم استوانه با فرض قطر برابر عرض ورودی: ${cylinder.toStringAsFixed(3)} مترمکعب';
-
-        case 21:
-          result = 'فرغون: ${(v('volume') * 1000 / v('wheel')).ceil()} بار\nمیکسر: ${(v('volume') * 1000 / v('mixer')).ceil()} نوبت کامل';
-          break;
-        case 22:
-          final bank = v('length') * v('width') * v('depth');
-          final loose = bank * v('factor');
-          result = 'حجم درجا: ${bank.toStringAsFixed(2)} مترمکعب\nحجم با تورم: ${loose.toStringAsFixed(2)} مترمکعب\nکامیون: ${(loose / v('truck')).ceil()} سرویس';
-          break;
-        case 23:
-        case 25:
-        case 26:
-        case 28:
-        case 29:
-        case 30:
-        case 31:
-        case 38:
-        case 39:
-          final amount = v('area') * v('rate');
-          if (widget.spec.id == 30) {
-            result = '${amount.ceil()} عدد بلوک سقفی';
-          } else {
-            result = '${amount.toStringAsFixed(2)} ${widget.spec.resultUnit}';
-          }
-          break;
-        case 40:
-          final dryMaterialKg = v('volume') * v('rate');
-          result = '${dryMaterialKg.toStringAsFixed(1)} کیلوگرم مصالح خشک (حدود ${(dryMaterialKg / 1000).toStringAsFixed(3)} تن)';
-          break;
-        case 24:
-          result = 'مصالح سنگی کل: ${(v('volume') * v('total')).toStringAsFixed(1)} کیلوگرم\nشن: ${(v('volume') * v('gravel')).toStringAsFixed(2)} مترمکعب\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(2)} مترمکعب';
-          break;
-        case 32:
-          final eff = v('slab') - v('deck') / 2;
-          if (eff <= 0) throw const FormatException('ضخامت مؤثر بتن باید مثبت باشد.');
-          result = 'ورق با پرت: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\nبتن: ${(v('area') * eff).toStringAsFixed(3)} مترمکعب';
-          break;
-        case 33:
-          result = 'قالب: ${(v('area') / v('module') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد\nبتن: ${(v('area') * v('thickness')).toStringAsFixed(3)} مترمکعب';
-          break;
-        case 34:
-          result = '${(v('wall') * v('factor')).toStringAsFixed(3)} مترمکعب ملات';
-          break;
-        case 35:
-          result = 'سیمان: ${(v('volume') * v('cement')).toStringAsFixed(1)} کیلوگرم\nماسه: ${(v('volume') * v('sand')).toStringAsFixed(1)} کیلوگرم';
-          break;
-        case 36:
-          result = '${(v('volume') * v('rate')).ceil()} عدد آجر';
-          break;
-        case 37:
-          final net = v('area') - _value('openings', allowZero: true);
-          if (net <= 0) throw const FormatException('مساحت خالص دیوار باید مثبت باشد.');
-          result = '${(net / v('block') * (1 + v('waste', allowZero: true) / 100)).ceil()} عدد بلوک';
-          break;
-        case 41:
-        case 42:
-          result = '${(v('area') / v('coverage') * (1 + v('waste', allowZero: true) / 100)).ceil()} کیسه ۴۰ کیلویی';
-          break;
-        case 43:
-          result = 'ورق: ${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع\nپیچ: ${(v('area') * v('screws')).ceil()} عدد\nشاخص طول سازه فرعی: ${(v('area') * 100 / v('spacing')).toStringAsFixed(1)} متر';
-          break;
-        case 44:
-        case 45:
-          final extra = widget.spec.id == 44 ? v('waste', allowZero: true) : v('extra', allowZero: true);
-          result = '${(v('area') * v('coats') / v('coverage') * (1 + extra / 100)).toStringAsFixed(2)} کیلوگرم رنگ';
-          break;
-        case 46:
-          result = 'کارتن آجر ال: ${(v('area') / v('carton')).ceil()}\nکیسه بندکشی: ${(v('area') / v('mortar')).ceil()}';
-          break;
-        case 47:
-          result = '${(v('area') * (1 + v('waste', allowZero: true) / 100)).toStringAsFixed(2)} مترمربع سفارش';
-          break;
-        case 48:
-          final watts = v('area') * v('rate');
-          result = 'بار گرمایشی: ${watts.toStringAsFixed(0)} وات\nپره رادیاتور: ${(watts / v('fin')).ceil()} عدد';
-          break;
-        case 49:
-          result = 'آب سرد و گرم: ${(v('area') * v('waterRate')).toStringAsFixed(1)} متر\nفاضلاب، باران و هواکش: ${(v('area') * v('drainRate')).toStringAsFixed(1)} متر';
-          break;
-        case 50:
-          result = 'طول سیم: ${(v('area') * v('rate')).toStringAsFixed(1)} متر\nکلید و پریز: ${v('points').ceil()} عدد';
-          break;
-        case 20:
-          final asphaltKg = v('area') * v('thickness') / 100 * v('density');
-          final tiles = (v('area') / v('tileArea') * (1 + _value('waste', allowZero: true) / 100)).ceil();
-          result = 'آسفالت: ${asphaltKg.toStringAsFixed(1)} کیلوگرم\nکاشی/سرامیک با پرت: $tiles عدد';
-        default:
-          throw const FormatException('برای این مورد محاسبه عددی تعریف نشده است.');
-      }
+      final result = computeEstimate(widget.spec.id, _value, resultUnit: widget.spec.resultUnit);
       setState(() { _result = result; _error = null; });
       final entered = widget.spec.inputs.map((field) => '${field.label}: ${_controllers[field.key]?.text ?? ''} ${field.unit}').join('، ');
       final activeProject = await WorkspaceStore.activeProject();
@@ -450,7 +322,17 @@ class _EstimateDetailPageState extends State<_EstimateDetailPage> {
                 padding: const EdgeInsets.all(16),
                 child: SelectableText(_result!, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, height: 1.8)),
               )),
+              if (parseResultQuantity(_result!) != null) ...[
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  key: const Key('add-to-boq'),
+                  onPressed: _addToBoq,
+                  icon: const Icon(Icons.playlist_add),
+                  label: const Text('افزودن به صورت‌مقادیر'),
+                ),
+              ],
             ],
+            const AdSlot(),
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: const TextStyle(color: Colors.redAccent)),
