@@ -109,37 +109,44 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.pumpWidget(MetreYarApp(economy: Economy()));
       await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(const Duration(milliseconds: 600));
+    }
+
+    Future<void> settle(WidgetTester tester) async {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
     }
 
     testWidgets('settings opens, changes theme and edits the profile', (tester) async {
       await openApp(tester);
       await tester.tap(find.byIcon(Icons.settings_outlined));
-      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
       expect(find.text('تنظیمات برنامه'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('theme-blueprint')));
-      await tester.pump(const Duration(milliseconds: 400));
+      await settle(tester);
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('themeKey'), 'blueprint');
 
       await tester.tap(find.byKey(const Key('settings-profile')));
-      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
       await tester.enterText(find.byType(TextField).at(0), 'علی');
       await tester.enterText(find.byType(TextField).at(1), 'رضایی');
       await tester.tap(find.text('ذخیره مشخصات'));
-      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
       expect(prefs.getString('profile.firstName'), 'علی');
     });
 
     testWidgets('profile card on the home page opens the editor and shows the name', (tester) async {
       await openApp(tester);
       await tester.tap(find.text('مهندس گرامی، خوش آمدید'));
-      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
       expect(find.text('پروفایل کاربر'), findsOneWidget);
       await tester.enterText(find.byType(TextField).at(0), 'سارا');
       await tester.tap(find.text('ذخیره مشخصات'));
-      await tester.pump(const Duration(milliseconds: 800));
-      await tester.pump(const Duration(milliseconds: 800));
+      await settle(tester);
+      await settle(tester);
       expect(find.textContaining('سارا'), findsWidgets);
     });
 
@@ -157,7 +164,7 @@ void main() {
     testWidgets('converter converts across categories', (tester) async {
       await openApp(tester);
       await tester.tap(find.text('تبدیل واحد'));
-      await tester.pump(const Duration(milliseconds: 600));
+      await settle(tester);
       await tester.enterText(find.byKey(const Key('conv-input')), '۵');
       await tester.pump();
       expect(find.byKey(const Key('conv-result')), findsOneWidget);
