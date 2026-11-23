@@ -94,12 +94,6 @@ jobs:
             --dart-define=ADIVERY_APP_ID="$ADIVERY_APP_ID" \
             --dart-define=ADIVERY_BANNER_ID="$ADIVERY_BANNER_ID"
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: metreyar-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
       - name: Validate release inputs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_draft_release }}
         env:
